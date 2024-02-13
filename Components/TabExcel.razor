@@ -1,0 +1,109 @@
+﻿@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+@using Blazored.LocalStorage
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Data
+@using System.Text.Json
+@using MudBlazor
+
+@inject IJSRuntime JSRuntime
+@inject IExcelService excelService
+@inject ILocalStorageService localStore
+@inject MudBlazor.IDialogService DialogService
+<style>
+    .data-item {
+        white-space: nowrap;
+        width: 150px;
+        overflow: hidden;
+        text-overflow: clip;
+    }
+</style>
+
+<FluentTabs ActiveTabId="tab-0" ActiveTabIdChanged=@tabChange>
+    @for (var index = 0; index < ds.Count; index++)
+    {
+        try {
+            var tabName = $"tab-{@index.ToString()}";
+            var tabNameDisplay = ds[index].Name;
+            var dsTable = ds[index];
+            this.table = dsTable;
+            <FluentTab Id=@tabName>
+                <Header>
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.LeafOne())" />
+                    @tabNameDisplay
+                </Header>
+                <Content>
+
+                <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
+
+                <div>
+                    <button onclick="@save">Guardar</button>
+                </div>
+                </Content>
+            </FluentTab>
+        }   
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+
+    }
+</FluentTabs>
+
+@code {
+    private TableDynamic childComponentRef;
+    private TableExcel table;
+
+    [Parameter]
+    public IList<TableExcel> ds { get; set; } = new List<TableExcel>();
+
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    string nameFilter = string.Empty;
+
+    private void HandleCountryFilter(ChangeEventArgs args)
+    {
+        if (args.Value is string value)
+        {
+            nameFilter = value;
+        }
+    }
+
+    private async void tabChange(string nameTab) {
+        table = ds[Convert.ToInt16(nameTab.Replace("tab-", ""))];
+
+        await childComponentRef?.UpdateTable(table);
+
+    }
+    private void HandleClear()
+    {
+        if (string.IsNullOrWhiteSpace(nameFilter))
+        {
+            nameFilter = string.Empty;
+        }
+    }
+
+    private async void save() {
+        try
+        {
+            await this.excelService.saveAsync(this.table);
+
+            var user = await localStore.GetItemAsync<User>("user");
+
+            if (user == null)
+            {
+                user = new User();
+                user.AddTable(this.table);
+                await localStore.SetItemAsync<User>("user", user);
+            }
+            
+            var options = new DialogOptions { CloseOnEscapeKey = true };
+            DialogService.Show<TabExcel>("Done", options);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+  
+    }
+}

@@ -1,0 +1,38 @@
+﻿@page "/app/{value}"
+@using BlazorAppExcel.Components
+@using BlazorAppExcel.Models
+@using BlazorAppExcel.Pages.Dialogs
+@using Blazored.LocalStorage
+
+@inject ILocalStorageService localStore
+@inject IDialogService DialogService
+
+<h3>App @Value</h3>
+
+<TableDynamic table=@table @ref="childComponentRef"></TableDynamic>
+
+
+<MudButton OnClick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+    Open Dialog
+</MudButton>
+
+@code {
+    private TableExcel table;
+    private TableDynamic childComponentRef;
+
+    [Parameter]
+    public string Value { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await localStore.GetItemAsync<User>("user") ?? new User();
+
+        table = user.Tables[Value];
+
+    }
+
+    private void OpenDialog()
+    {    
+        DialogService.Show<Dialogs.EditDialog>("Simple Dialog");
+    }
+}

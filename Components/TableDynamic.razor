@@ -1,0 +1,68 @@
+@using BlazorAppExcel.Models
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Text.Json
+
+@inject IJSRuntime JSRuntime
+
+@if (table == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Edit</th>
+                @foreach (var column in table.Columns)
+                {
+                    <th>@column.Value</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (RowExcel row in table.Rows)
+            {
+
+                <tr>
+                    <td>
+                        <a href="/excel/edit?row={@row.Values[0]}">Edit</a>
+                    </td>
+                    @foreach (string cell in @row.Values)
+                    {
+                        <td>@cell</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public TableExcel table { get; set; } = new TableExcel();
+
+    string tabName = string.Empty;
+
+    string id_table = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        string id_table = $"table-excel-{table?.Name}";
+        tabName = table?.Name;
+
+    }
+    public async Task UpdateTable(TableExcel table)
+    {
+        @* await JSRuntime.InvokeAsync<string>("loadGrid", $"#{table.Name}"); *@
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        @* if (firstRender)
+await JSRuntime.InvokeAsync<string>("loadGrid", $"#{table.Name}"); *@
+    }
+
+}

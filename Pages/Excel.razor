@@ -1,0 +1,23 @@
+﻿@using BlazorAppExcel.Components
+@using BlazorAppExcel.Models
+@using NPOI.HSSF.UserModel
+@using NPOI.SS.UserModel
+@using NPOI.XSSF.UserModel
+@using System.Data
+
+@page "/excel"
+
+<h3>Import Excel</h3>
+
+<InputFile OnChange="@ImportFileExcel"></InputFile>
+
+<TabExcel ds=@ds></TabExcel>
+
+@code {
+    IList<TableExcel> ds = new List<TableExcel>();
+    async Task ImportFileExcel(InputFileChangeEventArgs e)
+    {
+
+        ds = await Util.getDataSetAsync(e); 
+    }
+}

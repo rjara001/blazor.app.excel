@@ -1,0 +1,7 @@
+.data-item {
+    white-space: nowrap;
+    width: 10px;
+    overflow: hidden;
+    text-overflow: clip;
+    border: 1px solid #000000;
+}
