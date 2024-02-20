@@ -1,15 +1,17 @@
-﻿@using BlazorAppExcel.Interfaces
+﻿@using BlazorAppExcel.Components.atomic
+@using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 @using Blazored.LocalStorage
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.Data
 @using System.Text.Json
-@using MudBlazor
 
 @inject IJSRuntime JSRuntime
 @inject IExcelService excelService
 @inject ILocalStorageService localStore
 @inject MudBlazor.IDialogService DialogService
+@inject IUserSingletonService userServices;
+
 <style>
     .data-item {
         white-space: nowrap;
@@ -22,8 +24,7 @@
 <FluentTabs ActiveTabId="tab-0" ActiveTabIdChanged=@tabChange>
     @for (var index = 0; index < ds.Count; index++)
     {
-        try {
-            var tabName = $"tab-{@index.ToString()}";
+             var tabName = $"tab-{@index.ToString()}";
             var tabNameDisplay = ds[index].Name;
             var dsTable = ds[index];
             this.table = dsTable;
@@ -41,12 +42,6 @@
                 </div>
                 </Content>
             </FluentTab>
-        }   
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
-
     }
 </FluentTabs>
 
@@ -83,27 +78,24 @@
     }
 
     private async void save() {
-        try
+   
+        await this.excelService.saveAsync(this.table);
+
+        var user = await localStore.GetItemAsync<User>("user");
+
+        if (user == null)
         {
-            await this.excelService.saveAsync(this.table);
-
-            var user = await localStore.GetItemAsync<User>("user");
-
-            if (user == null)
-            {
-                user = new User();
-                user.AddTable(this.table);
-                await localStore.SetItemAsync<User>("user", user);
-            }
+            this.userServices.User = new User();
+            this.userServices.User.AddTable(this.table);
+            // await localStore.SetItemAsync<User>("user", user);
+        }
             
-            var options = new DialogOptions { CloseOnEscapeKey = true };
-            DialogService.Show<TabExcel>("Done", options);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            throw;
-        }
-  
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var parameters = new MudBlazor.DialogParameters<Dialog>();
+        parameters.Add(x => x.Title, "Save Succesfully");
+
+       DialogService.Show<Dialog>("Save Succesfully", options);
+
     }
 }

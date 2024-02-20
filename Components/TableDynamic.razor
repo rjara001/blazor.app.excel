@@ -1,8 +1,13 @@
+@using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
-@using Microsoft.FluentUI.AspNetCore.Components
 @using System.Text.Json
+@using BlazorAppExcel.Pages.Dialogs
+@using BlazorAppExcel.Components
+@using System.Linq;
+@using BlazorAppExcel.Share.Models
 
 @inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
 
 @if (table == null)
 {
@@ -13,7 +18,10 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Edit</th>
+                @if (AllowedEdit)
+                {
+                    <th>Edit</th>
+                }
                 @foreach (var column in table.Columns)
                 {
                     <th>@column.Value</th>
@@ -21,18 +29,26 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (RowExcel row in table.Rows)
-            {
 
+            @foreach (var (row, index) in table.Rows.Select((item, index) => (item, index)))
+            {
+                IList<string> columns = table.Columns.Select(_=>_.Value).ToList();
+              
                 <tr>
-                    <td>
-                        <a href="/excel/edit?row={@row.Values[0]}">Edit</a>
-                    </td>
+
+                    @if (AllowedEdit)
+                    {
+                        <td>
+                            <button @onclick="@(e => OnEdit(row.getCellExcel(columns, index)))">Edit</button>
+                        </td>
+                    }
+       
                     @foreach (string cell in @row.Values)
                     {
                         <td>@cell</td>
                     }
                 </tr>
+
             }
         </tbody>
     </table>
@@ -40,9 +56,16 @@ else
 
 @code {
     [Parameter]
+    public bool AllowedEdit { get; set; } = false;
+
+    [Parameter]
     public TableExcel table { get; set; } = new TableExcel();
 
-    string tabName = string.Empty;
+    [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
+
+    // [Parameter] public Action<RowCellExcel> OnSave { get; set; }
+
+    private string tabName = string.Empty;
 
     string id_table = string.Empty;
 
@@ -57,12 +80,4 @@ else
     {
         @* await JSRuntime.InvokeAsync<string>("loadGrid", $"#{table.Name}"); *@
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-
-        @* if (firstRender)
-await JSRuntime.InvokeAsync<string>("loadGrid", $"#{table.Name}"); *@
-    }
-
 }

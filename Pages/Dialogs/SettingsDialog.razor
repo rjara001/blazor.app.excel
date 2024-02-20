@@ -1,0 +1,85 @@
+﻿
+@using BlazorAppExcel.Models;
+@using BlazorAppExcel.Share.Enums
+@using BlazorAppExcel.Share.Models
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+            Settings Item
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @foreach (var (item, index) in Columns.Select((item, index) => (item, index)))
+        {
+            MudSelect<string> mudSelectField = this.Values.FirstOrDefault(_ => _.Key == item).Value;
+
+            if (mudSelectField == null)
+            {
+                mudSelectField = new MudSelect<string>();
+  
+                Values.Add(item, mudSelectField);
+            }
+            string defaultValue = (this.Types.Count() >= 1) ? this.Types[index].ToString(): "";
+
+            <MudSelect T="string" Label="@item" AnchorOrigin="Origin.BottomCenter" @ref="Values[item]" @bind-Value="defaultValue">
+            @foreach (ExcelCellType typeEnum in Enum.GetValues(typeof(ExcelCellType)))
+            {
+
+                string name = Enum.GetName(typeof(ExcelCellType), typeEnum).ToString();
+                string value = Convert.ToString((int)typeEnum);
+
+                    <MudSelectItem  Value="@value">@name</MudSelectItem>
+            }
+            </MudSelect>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="SaveItem">Save</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    public IDictionary<string, MudSelect<string>> Values = new Dictionary<string, MudSelect<string>>();
+
+    [Parameter] public IList<string> Columns { get; set; }
+    [Parameter] public IList<int> Types { get; set; }
+    [Parameter] public Action<IList<int>> Save { get; set; }
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        this.StateHasChanged();
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+    private void SaveItem()
+    {
+        IList<int> types = new List<int>();
+
+        foreach (var item in this.Values)
+        {
+            if (item.Value != null)
+            {
+                types.Add(Convert.ToInt16(item.Value.Value));
+            }
+
+        }
+
+        Save(types);
+
+    }
+}

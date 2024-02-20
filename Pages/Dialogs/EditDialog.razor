@@ -1,41 +1,72 @@
-﻿<MudDialog>
+﻿
+@using BlazorAppExcel.Models;
+@using BlazorAppExcel.Share.Models
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+            Edit Item
+        </MudText>
+    </TitleContent>
     <DialogContent>
-        <div class="d-flex flex-column py-1">
-            <MudButton OnClick="ChangeTitle">Change Title</MudButton>
-            <MudButton OnClick="ToggleCloseButton">Toggle Close Button</MudButton>
-            <MudButton OnClick="ToggleFullWidth">Toggle Full Width</MudButton>
-            <MudButton OnClick="ToggleHeader">Toggle Header</MudButton>
-        </div>
+        @foreach (var (item, index) in RowExcel.Cells.Select((item, index) => (item, index))) //  (CellExcel item in RowExcel.Cells) //foreach (var (item, index) in items.Select((item, index) => (item, index)))
+        {
+            MudTextField<string> mudTextField = this.Values.FirstOrDefault(_ => _.Key == item.Name).Value;
+
+            if (mudTextField==null)
+            {
+                mudTextField = new MudTextField<string>();
+                mudTextField.Tag = item;
+
+                Values.Add(item.Name, mudTextField);
+            }
+
+            <MudTextField T="string" @ref="Values[item.Name]" Value="@item.Value" Label="@item.Name" />
+        }
+
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="Close">Ok</MudButton>
+        <MudButton OnClick="SaveItem">Save</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+
     </DialogActions>
 </MudDialog>
+
 @code {
+    [Parameter] public RowCellExcel RowExcel { get; set; }
+    [Parameter]
+    public Action<RowCellExcel> Save { get; set; }
+
+    public IDictionary<string, MudTextField<string>> Values = new Dictionary<string, MudTextField<string>>();
+
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    void Close() => MudDialog.Close(DialogResult.Ok(true));
-
-    void ChangeTitle()
+    protected override void OnInitialized()
     {
-        MudDialog.SetTitle("Current time is: " + DateTime.Now);
+        base.OnInitialized();
+
     }
 
-    void ToggleCloseButton()
+    private void Cancel()
     {
-        MudDialog.Options.CloseButton = !(MudDialog.Options.CloseButton ?? false);
-        MudDialog.SetOptions(MudDialog.Options);    
+        MudDialog.Cancel();
     }
 
-    void ToggleFullWidth()
+    private void SaveItem()
     {
-        MudDialog.Options.FullWidth = !(MudDialog.Options.FullWidth ?? true);
-        MudDialog.SetOptions(MudDialog.Options);
-    }
+        foreach (var item in this.Values)
+        {
+            if (item.Value != null)
+            {
+                var valueItem = this.RowExcel.Cells.FirstOrDefault(_ => _.Name == item.Key);
+                if (valueItem != null)
+                    valueItem.Value = item.Value.Value;
+            }
 
-    void ToggleHeader()
-    {
-        MudDialog.Options.NoHeader = !(MudDialog.Options.NoHeader ?? false);
-        MudDialog.SetOptions(MudDialog.Options);
+        }
+
+        this.Save(RowExcel);
     }
 }

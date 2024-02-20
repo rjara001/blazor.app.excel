@@ -1,38 +1,105 @@
 ﻿@page "/app/{value}"
 @using BlazorAppExcel.Components
+@using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
+
 @using BlazorAppExcel.Pages.Dialogs
 @using Blazored.LocalStorage
+@using BlazorAppExcel.Share.Models;
 
-@inject ILocalStorageService localStore
-@inject IDialogService DialogService
+@inject IUserSingletonService userServices;
+@inject IDialogService DialogService;
+@inject IExcelService excelService
 
 <h3>App @Value</h3>
 
-<TableDynamic table=@table @ref="childComponentRef"></TableDynamic>
 
-
-<MudButton OnClick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
-    Open Dialog
-</MudButton>
+<button class="btn btn-primary" @onclick="AddNew">
+    <i class="glyphicon glyphicon-plus"></i> Add
+</button>
+<button class="btn btn-primary" @onclick="Settings">
+    <i class="glyphicon glyphicon-plus"></i> Settings
+</button>
+<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit"></TableDynamic>
 
 @code {
-    private TableExcel table;
+    private TableExcel table;                                                                                                
     private TableDynamic childComponentRef;
 
     [Parameter]
     public string Value { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    IDialogReference _dialogTable;
+    IDialogReference _dialogSettings;
+
+    private void Edit(RowCellExcel row)
     {
-        var user = await localStore.GetItemAsync<User>("user") ?? new User();
+        var parameters = new DialogParameters<EditDialog>();
+        parameters.Add(x => x.RowExcel, row);
+        parameters.Add(x => x.Save, this.OnSave);
 
-        table = user.Tables[Value];
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
+        _dialogTable = DialogService.Show<EditDialog>("Simple Dialog", parameters, options);
     }
 
-    private void OpenDialog()
-    {    
-        DialogService.Show<Dialogs.EditDialog>("Simple Dialog");
+    private void AddNew()
+    {
+        IList<string> columns = table.Columns.Values.Select(value => value.ToString()).ToList();
+
+        RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Rows.Count()+1); // new RowCellExcel(columns, new RowExcel(), table.Rows.Count + 1);
+
+        var parameters = new DialogParameters<EditDialog>();
+        parameters.Add(x => x.RowExcel, _newRow);
+        parameters.Add(x => x.Save, this.OnSave);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        _dialogTable = DialogService.Show<EditDialog>("Simple Dialog", parameters, options);
+    }
+
+    private void Settings()
+    {
+        var parameters = new DialogParameters<SettingsDialog>();
+        parameters.Add(x => x.Columns, this.table.Columns.Values.ToList());
+        parameters.Add(x => x.Types, this.table.Types);
+        parameters.Add(x => x.Save, this.OnSaveType);
+
+        _dialogSettings = DialogService.Show<SettingsDialog>("Simple Dialog", parameters);
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        table = userServices.User.TableActive;
+    }
+
+    public async void OnSaveType(IList<int> types)
+    {
+        this.table.Types = types;
+
+         await this.excelService.saveAsync(this.table);
+
+        _dialogSettings.Close();
+    
+    }
+
+    public async void OnSave(RowCellExcel row)
+    {
+   
+            var item = this.table.Rows[row.Id];
+
+            for (int i = 0; i < row.Columns.Count; i++)
+            {
+                item.Values[i] = row.Cells[i].Value;
+            }
+
+            await this.excelService.saveAsync(this.table);
+
+            _dialogTable.Close();
+
+            this.StateHasChanged();
+  
+
     }
 }

@@ -1,4 +1,5 @@
 
+using BlazorAppExcel.Components;
 using BlazorAppExcel.Models;
 using Microsoft.AspNetCore.Components.Forms;
 using NPOI.HSSF.UserModel;
@@ -8,15 +9,14 @@ using NPOI.XSSF.UserModel;
 public class Util
 {
 
-    public static TableExcel getDataTableFromSheet(ISheet sheet)
+    public static TableExcel getDataTableFromSheet(ISheet sheet, string IdUser)
     {
-        TableExcel dt = new TableExcel();
 
         IRow row = sheet.GetRow(0);
 
         int cc = row.LastCellNum>=12?12:row.LastCellNum;
 
-        dt.Name = sheet.SheetName;
+        TableExcel dt = new TableExcel(sheet.SheetName, IdUser);
 
         for (int i = 0; i < cc; i++)
         {
@@ -58,7 +58,7 @@ public class Util
 
         foreach (var item in sheets)
         {
-            ds.Add(getDataTableFromSheet(item));
+            ds.Add(getDataTableFromSheet(item, "User"));
         }
 
         return ds;

@@ -1,7 +1,15 @@
-﻿namespace BlazorAppExcel.Models
+﻿using BlazorAppExcel.Components;
+
+namespace BlazorAppExcel.Models
 {
     public class User
     {
+        public TableExcel TableActive { get; set; }
+
+        public User(IDictionary<string, TableExcel> tables)
+        {
+            this.Tables = tables;
+        }
         public User() { 
             this.Tables = new Dictionary<string, TableExcel>();
         }
