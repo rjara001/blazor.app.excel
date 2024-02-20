@@ -4,22 +4,22 @@
     
     
 
-            <MudTextField T="string" @ref="ValuesMudTextField[item.Name]" Value="@item.Value" Label="@item.Name" />
+<MudTextField T="string" @ref="Values[Item.Name]" Value="@Item.Value" Label="@Item.Name" />
 
 @code {
-    [Parameter] CellExcel Item { get; set; }
+    [Parameter] public CellExcel Item { get; set; }
+    [Parameter] public IDictionary<string, MudTextField<string>> Values { get; set; }
 
     protected override void OnInitialized()
-        {
+    {
             base.OnInitialized();
-            MudTextField<string> mudTextField = this.ValuesMudTextField.FirstOrDefault(_ => _.Key == item.Name).Value;
+            MudTextField<string> mudTextField = this.Values.FirstOrDefault(_ => _.Key == Item.Name).Value;
 
         @if (mudTextField == null)
         {
             mudTextField = new MudTextField<string>();
-            mudTextField.Tag = item;
 
-            ValuesMudTextField.Add(item.Name, mudTextField);
+            Values.Add(Item.Name, mudTextField);
         }
-        }
+    }
 }

@@ -20,7 +20,7 @@
 <button class="btn btn-primary" @onclick="Settings">
     <i class="glyphicon glyphicon-plus"></i> Settings
 </button>
-<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit"></TableDynamic>
+<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit" AllowedEdit="true"></TableDynamic>
 
 @code {
     private TableExcel table;                                                                                                

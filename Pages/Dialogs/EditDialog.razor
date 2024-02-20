@@ -1,7 +1,6 @@
 ﻿
 @using BlazorAppExcel.Models;
 @using BlazorAppExcel.Share.Models
-@inject ISnackbar Snackbar
 
 <MudDialog>
     <TitleContent>
@@ -13,7 +12,8 @@
     <DialogContent>
         @foreach (var (item, index) in RowExcel.Cells.Select((item, index) => (item, index))) //  (CellExcel item in RowExcel.Cells) //foreach (var (item, index) in items.Select((item, index) => (item, index)))
         {
-            MudTextField<string> mudTextField = this.Values.FirstOrDefault(_ => _.Key == item.Name).Value;
+            <RowEdit Item="item" Values="Values"></RowEdit>
+            @* MudTextField<string> mudTextField = this.Values.FirstOrDefault(_ => _.Key == item.Name).Value;
 
             if (mudTextField==null)
             {
@@ -23,7 +23,7 @@
                 Values.Add(item.Name, mudTextField);
             }
 
-            <MudTextField T="string" @ref="Values[item.Name]" Value="@item.Value" Label="@item.Name" />
+            <MudTextField T="string" @ref="Values[item.Name]" Value="@item.Value" Label="@item.Name" /> *@
         }
 
     </DialogContent>
