@@ -3,6 +3,7 @@
 @using BlazorAppExcel.Share.Enums
 @using BlazorAppExcel.Share.Models
 @inject ISnackbar Snackbar
+@using BlazorAppExcel.Components.Cells
 
 <MudDialog>
     <TitleContent>
@@ -12,28 +13,12 @@
         </MudText>
     </TitleContent>
     <DialogContent>
+
         @foreach (var (item, index) in Columns.Select((item, index) => (item, index)))
         {
-            MudSelect<string> mudSelectField = this.Values.FirstOrDefault(_ => _.Key == item).Value;
+            var typeSelected = ExcelCellTypeUtil.GetTypeFromValue(this.Types[index]).ToString();
 
-            if (mudSelectField == null)
-            {
-                mudSelectField = new MudSelect<string>();
-  
-                Values.Add(item, mudSelectField);
-            }
-            string defaultValue = (this.Types.Count() >= 1) ? this.Types[index].ToString(): "";
-
-            <MudSelect T="string" Label="@item" AnchorOrigin="Origin.BottomCenter" @ref="Values[item]" @bind-Value="defaultValue">
-            @foreach (ExcelCellType typeEnum in Enum.GetValues(typeof(ExcelCellType)))
-            {
-
-                string name = Enum.GetName(typeof(ExcelCellType), typeEnum).ToString();
-                string value = Convert.ToString((int)typeEnum);
-
-                    <MudSelectItem  Value="@value">@name</MudSelectItem>
-            }
-            </MudSelect>
+            <CellSelectElement Index="@index" Name="@item" Value="@typeSelected" Values="@Items" OnChildParameterChanged="UpdateChildParameter"></CellSelectElement>
         }
     </DialogContent>
     <DialogActions>
@@ -44,8 +29,7 @@
 </MudDialog>
 
 @code {
-
-    public IDictionary<string, MudSelect<string>> Values = new Dictionary<string, MudSelect<string>>();
+    IDictionary<string,string> Items = ExcelCellTypeUtil.GetEnumDictionary();
 
     [Parameter] public IList<string> Columns { get; set; }
     [Parameter] public IList<int> Types { get; set; }
@@ -58,28 +42,23 @@
         base.OnInitialized();
     }
 
+    private void UpdateChildParameter(KeyValuePair<int, string> item)
+    {
+        this.Types[item.Key] = Convert.ToInt16(item.Value);
+    }
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        this.StateHasChanged();
+        // this.StateHasChanged();
     }
 
     void Cancel() => MudDialog.Cancel();
 
     private void SaveItem()
     {
-        IList<int> types = new List<int>();
-
-        foreach (var item in this.Values)
-        {
-            if (item.Value != null)
-            {
-                types.Add(Convert.ToInt16(item.Value.Value));
-            }
-
-        }
-
-        Save(types);
+        Save(Types);
 
     }
+
 }

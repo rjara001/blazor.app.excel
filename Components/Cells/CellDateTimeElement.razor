@@ -1,0 +1,39 @@
+﻿<MudDatePicker T="string" @bind-Date="ValueDateTime" Label="@Name" />
+
+@code {
+    private DateTime _value;
+
+
+    [Parameter]
+    public EventCallback<string> OnChildParameterChanged { get; set; }
+
+
+    DateTime? ValueDateTime
+    {
+        get
+        {
+            return this._value;
+        }
+        set
+        {
+            if (_value == value) return;
+            this._value = value?? new DateTime(1900,1,1);
+            OnChildParameterChanged.InvokeAsync(value.ToString());
+
+        }
+    }
+
+    [Parameter] public string Value
+    { 
+        get
+        {
+            return (ValueDateTime??new DateTime(1900,1,1)).ToString();
+        } 
+        set
+        {
+            this._value = Convert.ToDateTime(value);
+        } 
+    }
+
+    [Parameter] public string Name { get; set; }
+}

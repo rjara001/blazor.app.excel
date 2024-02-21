@@ -33,13 +33,13 @@ else
             @foreach (var (row, index) in table.Rows.Select((item, index) => (item, index)))
             {
                 IList<string> columns = table.Columns.Select(_=>_.Value).ToList();
-              
+       
                 <tr>
 
                     @if (AllowedEdit)
                     {
                         <td>
-                            <button @onclick="@(e => OnEdit(row.getCellExcel(columns, index)))">Edit</button>
+                            <button @onclick="@(e => OnEdit(row.getCellExcel(columns, table.Types, index)))">Edit</button>
                         </td>
                     }
        

@@ -1,0 +1,69 @@
+﻿@using BlazorAppExcel.Models
+@using BlazorAppExcel.Share.Models
+@using BlazorAppExcel.Components.Cells
+
+@switch (Item.Type)
+{
+    case (int)Share.Enums.ExcelCellType.String:
+        @* <MudTextField T="string" @bind-Value="@Item.Value" Label="@Item.Name" /> *@
+        <CellTextElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellTextElement>
+        @* <CellTextElement Content="@Content"></CellTextElement> *@
+    break;
+    case (int)Share.Enums.ExcelCellType.DateTime:
+        @* <MudDatePicker T="string" @bind-Date="@Item.Value" Label="@Item.Name" /> *@
+        <CellDateTimeElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDateTimeElement>
+        break;
+    case (int)Share.Enums.ExcelCellType.Number:
+        <CellNumericElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellNumericElement>
+        
+        break;
+    case (int)Share.Enums.ExcelCellType.Decimal:
+        <CellDecimalElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDecimalElement>
+        break;
+    default:
+        <CellTextElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellTextElement>
+        break;
+}
+
+
+
+@code {
+    [Parameter] public CellExcel Item { get; set; }
+
+    private CellContent Content;
+
+    private void UpdateChildParameter(string value)
+    {
+        Item.Value = value;
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.Content = new CellContent(Item);
+   
+    }
+
+    public class CellContent
+    {
+
+        public CellContent(CellExcel cellExcel)
+        {
+            this.Name = cellExcel.Name;
+            this._value = cellExcel.Value;
+        }
+        private string _value;
+
+        public string Value 
+        { 
+            get
+            {
+                return this._value;
+            } set
+            {
+                this._value = value;
+            } 
+        }
+        public string Name { get; set; }
+    }
+}

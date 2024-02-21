@@ -10,20 +10,9 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        @foreach (var (item, index) in RowExcel.Cells.Select((item, index) => (item, index))) //  (CellExcel item in RowExcel.Cells) //foreach (var (item, index) in items.Select((item, index) => (item, index)))
+        @foreach (var item in RowExcel.Cells)
         {
-            <RowEdit Item="item" Values="Values"></RowEdit>
-            @* MudTextField<string> mudTextField = this.Values.FirstOrDefault(_ => _.Key == item.Name).Value;
-
-            if (mudTextField==null)
-            {
-                mudTextField = new MudTextField<string>();
-                mudTextField.Tag = item;
-
-                Values.Add(item.Name, mudTextField);
-            }
-
-            <MudTextField T="string" @ref="Values[item.Name]" Value="@item.Value" Label="@item.Name" /> *@
+            <CellEdit Item="@item"></CellEdit>
         }
 
     </DialogContent>
@@ -39,7 +28,7 @@
     [Parameter]
     public Action<RowCellExcel> Save { get; set; }
 
-    public IDictionary<string, MudTextField<string>> Values = new Dictionary<string, MudTextField<string>>();
+    public IDictionary<string, string> Values = new Dictionary<string, string>();
 
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
@@ -56,17 +45,6 @@
 
     private void SaveItem()
     {
-        foreach (var item in this.Values)
-        {
-            if (item.Value != null)
-            {
-                var valueItem = this.RowExcel.Cells.FirstOrDefault(_ => _.Name == item.Key);
-                if (valueItem != null)
-                    valueItem.Value = item.Value.Value;
-            }
-
-        }
-
         this.Save(RowExcel);
     }
 }

@@ -1,0 +1,41 @@
+﻿
+<MudNumericField @bind-Value="ValueDecimal" Label="@Name" />
+
+@code {
+    private Decimal _value;
+
+
+    [Parameter]
+    public EventCallback<string> OnChildParameterChanged { get; set; }
+
+
+    Decimal ValueDecimal
+    {
+        get
+        {
+            return this._value;
+        }
+        set
+        {
+            if (_value == value) return;
+            this._value = value;
+            OnChildParameterChanged.InvokeAsync(value.ToString());
+
+        }
+    }
+
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return ValueDecimal.ToString();
+        }
+        set
+        {
+            this._value = Convert.ToDecimal(value);
+        }
+    }
+
+    [Parameter] public string Name { get; set; }
+}

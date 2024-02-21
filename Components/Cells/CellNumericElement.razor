@@ -1,0 +1,41 @@
+﻿
+<MudNumericField @bind-Value="ValueInt64" Label="@Name" />
+
+@code {
+    private Int64 _value;
+
+
+    [Parameter]
+    public EventCallback<string> OnChildParameterChanged { get; set; }
+
+
+    Int64 ValueInt64
+    {
+        get
+        {
+            return this._value;
+        }
+        set
+        {
+            if (_value == value) return;
+            this._value = value;
+            OnChildParameterChanged.InvokeAsync(value.ToString());
+
+        }
+    }
+
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return ValueInt64.ToString();
+        }
+        set
+        {
+            this._value = Convert.ToInt64(value);
+        }
+    }
+
+    [Parameter] public string Name { get; set; }
+}

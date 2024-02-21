@@ -1,0 +1,36 @@
+﻿<MudSelect T="string" Label="@Name" AnchorOrigin="Origin.BottomCenter" @bind-Value="Value">
+
+    @foreach (var item in Values)
+    {
+        <MudSelectItem Value="@item.Key">@item.Value</MudSelectItem>
+    }
+
+</MudSelect>
+
+@code {
+    [Parameter] public IDictionary<string,string> Values { get; set; }
+    [Parameter] public int Index { get; set; }
+
+    private string _value;
+
+    [Parameter]
+    public EventCallback<KeyValuePair<int, string>> OnChildParameterChanged { get; set; }
+
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return this._value;
+        }
+        set
+        {
+            if (_value == value) return;
+            this._value = value;
+            OnChildParameterChanged.InvokeAsync(new KeyValuePair<int,string>(Index, value));
+
+        }
+    }
+
+    [Parameter] public string Name { get; set; }
+}

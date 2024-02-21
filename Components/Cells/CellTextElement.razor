@@ -1,0 +1,26 @@
+﻿@using static BlazorAppExcel.Components.CellEdit
+<MudTextField T="string" @bind-Value="Value" Label="@Name" />
+
+@code {
+
+    private string _value;
+
+    [Parameter]
+    public EventCallback<string> OnChildParameterChanged { get; set; }
+
+    [Parameter] public string Value {
+        get
+        {
+            return this._value;
+        }
+        set
+        {
+            if (_value == value) return;
+            this._value = value;
+            OnChildParameterChanged.InvokeAsync(value);
+
+        } 
+    }
+
+    [Parameter] public string Name { get; set; }
+}
