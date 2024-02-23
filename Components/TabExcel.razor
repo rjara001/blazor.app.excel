@@ -37,13 +37,14 @@
 
                 <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
 
-                <div>
-                    <button onclick="@save">Guardar</button>
-                </div>
+          
                 </Content>
             </FluentTab>
     }
 </FluentTabs>
+<div>
+    <button onclick="@save">Guardar</button>
+</div>
 
 @code {
     private TableDynamic childComponentRef;
@@ -78,24 +79,34 @@
     }
 
     private async void save() {
-   
-        await this.excelService.saveAsync(this.table);
+
+        for (var index = 0; index < ds.Count; index++)
+        {
+            TableExcel _table = ds[index];
+            await saveTable(_table);
+        }
+
+
+    }
+
+    private async Task saveTable(TableExcel table)
+    {
+        await this.excelService.saveAsync(table);
 
         var user = await localStore.GetItemAsync<User>("user");
 
         if (user == null)
         {
             this.userServices.User = new User();
-            this.userServices.User.AddTable(this.table);
+            this.userServices.User.AddTable(table);
             // await localStore.SetItemAsync<User>("user", user);
         }
-            
+
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
-        var parameters = new MudBlazor.DialogParameters<Dialog>();
+        var parameters = new MudBlazor.DialogParameters<SimpleDialog>();
         parameters.Add(x => x.Title, "Save Succesfully");
 
-       DialogService.Show<Dialog>("Save Succesfully", options);
-
+        DialogService.Show<SimpleDialog>("Save Succesfully", options);
     }
 }

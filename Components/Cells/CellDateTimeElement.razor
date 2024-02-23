@@ -31,7 +31,16 @@
         } 
         set
         {
-            this._value = Convert.ToDateTime(value);
+            try
+            {
+                this._value = Convert.ToDateTime(value);
+            }
+            catch (Exception)
+            {
+
+                this._value = DateTime.Now;
+            }
+            
         } 
     }
 

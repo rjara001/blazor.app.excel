@@ -20,7 +20,8 @@
 <button class="btn btn-primary" @onclick="Settings">
     <i class="glyphicon glyphicon-plus"></i> Settings
 </button>
-<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit" AllowedEdit="true"></TableDynamic>
+
+<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true"></TableDynamic>
 
 @code {
     private TableExcel table;                                                                                                
@@ -32,11 +33,26 @@
     IDialogReference _dialogTable;
     IDialogReference _dialogSettings;
 
+    private async void Delete(int index)
+    {
+        if (this.table.Rows.Count() >= index)
+        {
+            var item = this.table.Rows[index];
+            this.table.Rows.Remove(item);
+            await this.excelService.saveAsync(this.table);
+
+            this.StateHasChanged();
+        }
+
+
+    }
+
     private void Edit(RowCellExcel row)
     {
         var parameters = new DialogParameters<EditDialog>();
         parameters.Add(x => x.RowExcel, row);
         parameters.Add(x => x.Save, this.OnSave);
+        parameters.Add(x => x.TableExcel, table);
 
         var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
@@ -47,11 +63,12 @@
     {
         IList<string> columns = table.Columns.Values.Select(value => value.ToString()).ToList();
 
-        RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Rows.Count()+1); // new RowCellExcel(columns, new RowExcel(), table.Rows.Count + 1);
+        RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Types, table.Rows.Count()+1);
 
         var parameters = new DialogParameters<EditDialog>();
         parameters.Add(x => x.RowExcel, _newRow);
         parameters.Add(x => x.Save, this.OnSave);
+        parameters.Add(x => x.TableExcel, table);
 
         var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
@@ -78,28 +95,40 @@
     {
         this.table.Types = types;
 
-         await this.excelService.saveAsync(this.table);
+        await this.excelService.saveAsync(this.table);
 
         _dialogSettings.Close();
-    
+
     }
 
     public async void OnSave(RowCellExcel row)
     {
-   
-            var item = this.table.Rows[row.Id];
+        RowExcel item = null;
 
-            for (int i = 0; i < row.Columns.Count; i++)
-            {
-                item.Values[i] = row.Cells[i].Value;
-            }
+        if (this.table.Rows.Count() < row.Id)
+        {
+            item = row.NewRowExcel();
+            this.table.Rows.Add(item);
+        }
+      
+        else
+            item = this.table.Rows[row.Id];
 
-            await this.excelService.saveAsync(this.table);
+        for (int i = 0; i < row.Columns.Count; i++)
+        {
+            item.Values[i] = row.Cells[i].Value;
+        }
 
-            _dialogTable.Close();
+        await this.excelService.saveAsync(this.table);
 
-            this.StateHasChanged();
-  
+        _dialogTable.Close();
+
+        this.StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
 
     }
 }

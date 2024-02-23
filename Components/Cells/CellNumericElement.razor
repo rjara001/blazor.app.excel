@@ -1,4 +1,5 @@
-﻿
+﻿@using BlazorAppExcel.Share.Enums
+
 <MudNumericField @bind-Value="ValueInt64" Label="@Name" />
 
 @code {
@@ -8,6 +9,8 @@
     [Parameter]
     public EventCallback<string> OnChildParameterChanged { get; set; }
 
+    [Parameter]
+    public int Type { get; set; }
 
     Int64 ValueInt64
     {
@@ -33,7 +36,16 @@
         }
         set
         {
-            this._value = Convert.ToInt64(value);
+            try
+            {
+                this._value = Convert.ToInt64(Util.ExtractNumberFromString(value, (ExcelCellType)Type));
+            }
+            catch (Exception)
+            {
+
+                this._value = 0;
+            }
+    
         }
     }
 

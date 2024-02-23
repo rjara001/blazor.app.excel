@@ -1,10 +1,12 @@
 
 using BlazorAppExcel.Components;
 using BlazorAppExcel.Models;
+using BlazorAppExcel.Share.Enums;
 using Microsoft.AspNetCore.Components.Forms;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using System.Text;
 
 public class Util
 {
@@ -58,7 +60,7 @@ public class Util
 
         foreach (var item in sheets)
         {
-            ds.Add(getDataTableFromSheet(item, "User"));
+            ds.Add(getDataTableFromSheet(item, "user"));
         }
 
         return ds;
@@ -93,5 +95,66 @@ public class Util
     private static IWorkbook getWBFromType(string type, MemoryStream ms)
     {
         return type == ".xls" ? new HSSFWorkbook(ms) : new XSSFWorkbook(ms);
+    }
+
+    public static void LoadUniqueValues(TableExcel tableExcel)
+    {
+        for (int i = 0; i < tableExcel.Types.Count; i++)
+        {
+            var type = (ExcelCellType)tableExcel.Types[i];
+            if (type == ExcelCellType.Unique)
+                calculateUniqueValues(i, tableExcel);
+        }
+    }
+
+    private static void calculateUniqueValues(int index, TableExcel tableExcel)
+    {
+        var column = tableExcel.Columns[$"Column{index+1}"];
+
+        try
+        {
+            if (tableExcel.UniqueValues.ContainsKey(column))
+                return;
+
+            var uniqueValues = tableExcel.Rows.Select(row => {
+                return row.Values[index];
+            }
+            ).ToList();
+
+            // Convert the result to a list000000000000
+            List<string> uniqueList = uniqueValues.ToList();
+
+            var list = uniqueList.Distinct().ToList();
+
+
+            tableExcel.UniqueValues.Add(column, list);
+        }
+        catch (Exception e)
+        {
+
+            throw;
+        }
+      
+    }
+
+    public static string ExtractNumberFromString(string input, ExcelCellType type)
+    {
+      
+        if (input.StartsWith(","))
+        {
+            input = "0" + input;
+        }
+
+        if (type == ExcelCellType.Porcentage)
+        {
+            input = input.Replace("%", string.Empty);
+        }
+
+        if (type == ExcelCellType.Currency) {
+            input = input.Replace("$", string.Empty);    
+        }
+
+       
+        return input;
     }
 }

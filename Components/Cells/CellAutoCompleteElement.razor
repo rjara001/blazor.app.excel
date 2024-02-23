@@ -1,5 +1,7 @@
 ﻿@using static BlazorAppExcel.Components.CellEdit
-<MudTextField T="string" @bind-Value="Value" Label="@Name" /> 
+@* <MudTextField T="string" @bind-Value="Value" Label="@Name" /> *@
+<MudAutocomplete T="string" Label="@Name" @bind-Value="Value" SearchFunc="@Search"
+                 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
 @code {
 
     private string _value;
@@ -7,7 +9,9 @@
     [Parameter]
     public EventCallback<string> OnChildParameterChanged { get; set; }
 
-    [Parameter] public string Value {
+    [Parameter]
+    public string Value
+    {
         get
         {
             return this._value;
@@ -18,7 +22,7 @@
             this._value = value;
             OnChildParameterChanged.InvokeAsync(value);
 
-        } 
+        }
     }
 
     [Parameter] public string Name { get; set; }
@@ -27,7 +31,7 @@
 
     private async Task<IEnumerable<string>> Search(string value)
     {
-// if text is null or empty, don't return values (drop-down will not open)
+        // if text is null or empty, don't return values (drop-down will not open)
         if (string.IsNullOrEmpty(value))
             return new string[0];
         return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));

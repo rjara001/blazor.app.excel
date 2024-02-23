@@ -5,12 +5,12 @@
 @switch (Item.Type)
 {
     case (int)Share.Enums.ExcelCellType.String:
-        @* <MudTextField T="string" @bind-Value="@Item.Value" Label="@Item.Name" /> *@
         <CellTextElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellTextElement>
-        @* <CellTextElement Content="@Content"></CellTextElement> *@
+    break;
+    case (int)Share.Enums.ExcelCellType.Unique:
+        <CellAutoCompleteElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter" Values="@UniqueValues"></CellAutoCompleteElement>
     break;
     case (int)Share.Enums.ExcelCellType.DateTime:
-        @* <MudDatePicker T="string" @bind-Date="@Item.Value" Label="@Item.Name" /> *@
         <CellDateTimeElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDateTimeElement>
         break;
     case (int)Share.Enums.ExcelCellType.Number:
@@ -18,17 +18,19 @@
         
         break;
     case (int)Share.Enums.ExcelCellType.Decimal:
-        <CellDecimalElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDecimalElement>
+    case (int)Share.Enums.ExcelCellType.Currency:
+    case (int)Share.Enums.ExcelCellType.Porcentage:
+        <CellDecimalElement Type="@Item.Type" Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDecimalElement>
         break;
     default:
         <CellTextElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellTextElement>
         break;
 }
 
-
-
 @code {
     [Parameter] public CellExcel Item { get; set; }
+    [Parameter]
+    public IList<string> UniqueValues { get; set; }
 
     private CellContent Content;
 
@@ -41,7 +43,6 @@
     {
         base.OnInitialized();
         this.Content = new CellContent(Item);
-   
     }
 
     public class CellContent

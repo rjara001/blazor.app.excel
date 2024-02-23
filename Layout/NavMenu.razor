@@ -36,7 +36,7 @@
         tables = await excelService.getTableExcels("user");
 
         this.userServices.User = new User(tables.ToDictionary(obj => obj.Name));
-        // user = await localStore.GetItemAsync<User>("user")??new User();
+
     }
 
     private void ToggleNavMenu()

@@ -12,7 +12,7 @@
     <DialogContent>
         @foreach (var item in RowExcel.Cells)
         {
-            <CellEdit Item="@item"></CellEdit>
+            <CellEdit Item="@item" UniqueValues="@UniqueValues(item.Name)"></CellEdit>
         }
 
     </DialogContent>
@@ -25,8 +25,9 @@
 
 @code {
     [Parameter] public RowCellExcel RowExcel { get; set; }
-    [Parameter]
-    public Action<RowCellExcel> Save { get; set; }
+    [Parameter] public Action<RowCellExcel> Save { get; set; }
+
+    [Parameter] public TableExcel TableExcel { get; set; }
 
     public IDictionary<string, string> Values = new Dictionary<string, string>();
 
@@ -36,6 +37,16 @@
     {
         base.OnInitialized();
 
+    }
+
+    private IList<string> UniqueValues(string name)
+    {
+        Util.LoadUniqueValues(TableExcel);
+
+        if (TableExcel.UniqueValues.ContainsKey(name))
+            return TableExcel.UniqueValues[name];
+
+        return new List<string>();
     }
 
     private void Cancel()
