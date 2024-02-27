@@ -1,5 +1,6 @@
-﻿@using static BlazorAppExcel.Components.CellEdit
-<MudTextField T="string" @bind-Value="Value" Label="@Name" /> 
+﻿@using System.Text.RegularExpressions
+@using static BlazorAppExcel.Components.CellEdit
+<MudTextField T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" />
 @code {
 
     private string _value;
@@ -15,6 +16,7 @@
         set
         {
             if (_value == value) return;
+            value = formatCurrency(value);
             this._value = value;
             OnChildParameterChanged.InvokeAsync(value);
 
@@ -25,11 +27,17 @@
 
     [Parameter] public IList<string> Values { get; set; }
 
-    private async Task<IEnumerable<string>> Search(string value)
+    private void HandleError(string errorMessage) {
+        Console.WriteLine($"Mask error: {errorMessage}");
+    }
+
+    private string formatCurrency(string num)
     {
-// if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
-            return new string[0];
-        return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        num = Util.ExtractNumberFromString(num, Share.Enums.ExcelCellType.Currency);
+        Double value;
+        if (Double.TryParse(num, out value))
+            return String.Format(System.Globalization.CultureInfo.CurrentCulture, "{0:C2}", value);
+        else
+            return String.Empty;
     }
 }

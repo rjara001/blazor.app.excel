@@ -1,6 +1,8 @@
-﻿@using static BlazorAppExcel.Components.CellEdit
-@* <MudTextField T="string" @bind-Value="Value" Label="@Name" /> *@
+﻿@using System.Globalization
+@using static BlazorAppExcel.Components.CellEdit
+
 <MudAutocomplete T="string" Label="@Name" @bind-Value="Value" SearchFunc="@Search"
+                 CoerceValue="true"
                  AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
 @code {
 
@@ -28,6 +30,36 @@
     [Parameter] public string Name { get; set; }
 
     [Parameter] public IList<string> Values { get; set; }
+
+    private string _autocompleteText;
+
+    private void OnComboValueChanged(string value)
+    {
+        string porcentageValue = Util.ExtractNumberFromString(value, Share.Enums.ExcelCellType.Porcentage);
+
+
+        try
+        {
+            double doubleValue = 0;
+            doubleValue = Convert.ToDouble(porcentageValue) / 100;
+            Value = String.Format("{0:P2}", doubleValue.ToString("P02", CultureInfo.CurrentCulture));
+        }
+        catch { }
+
+    }
+
+    private void HandleTextChange(string newText)
+    {
+        _autocompleteText = newText;
+    }
+
+    public void HandleBlur(FocusEventArgs args)
+    {
+        if (!Values.Contains(_autocompleteText))
+        {
+            Values.Add(_autocompleteText);
+        }
+    }
 
     private async Task<IEnumerable<string>> Search(string value)
     {

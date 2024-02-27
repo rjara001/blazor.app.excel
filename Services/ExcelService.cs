@@ -48,5 +48,12 @@ namespace BlazorAppExcel.Services
             await httpClient.PostAsync("excel", content);
         }
 
+        public async Task Delete(string idUser, string id)
+        {
+            var httpClient = _httpClientFactory.CreateClient("MyNamedClient");
+
+            await httpClient.DeleteAsync($"excel/{idUser}/{id}");
+        }
+
     }
 }

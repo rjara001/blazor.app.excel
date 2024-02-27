@@ -1,0 +1,67 @@
+﻿@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+@inject NavigationManager NavigationManager;
+@inject IUserSingletonService userServices;
+@inject IDialogService DialogService;
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">@Table.Name</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+           
+            <MudMenu Icon="@Icons.Material.Filled.Settings" Color="Color.Primary">
+                    <MudMenuItem OnClick="()=> Go()">Edit</MudMenuItem>
+                    <MudMenuItem OnClick="() => Delete()">Delete</MudMenuItem>
+            </MudMenu>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudText Typo="Typo.body2">@getFileNameValue()</MudText>
+    </MudCardContent>
+    <MudCardActions>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => Go()">@getDateCreationValue()</MudButton>
+    </MudCardActions>
+</MudCard>
+
+    @code {
+
+    [Parameter] public TableExcel Table { get; set; }
+    [Parameter] public Action<TableExcel> OnDelete { get; set; }
+
+    private async void Delete()
+    {
+        var parameters = new DialogParameters<SimpleDialog>();
+        parameters.Add(x => x.Title, $"Deleting {Table.Name}");
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
+        var _result = await _dialog.Result;
+        if (Convert.ToBoolean(_result.Data) == true)
+            OnDelete(Table);
+    }
+
+    public void Go()
+    {
+        this.userServices.User.TableActive = Table;
+
+        NavigationManager.NavigateTo($"app/{Table.CodeName}");
+    }
+
+    private string getFileNameValue()
+    {
+        if (Table.FileName == null)
+            return "(value no register)";
+
+        return Table.FileName;
+    }
+
+    private string getDateCreationValue()
+    {
+        if (Table.DateCreation == null)
+            return Table.Name;
+        return Table.DateCreation.ToLongDateString();
+    }
+}

@@ -24,22 +24,19 @@
 <FluentTabs ActiveTabId="tab-0" ActiveTabIdChanged=@tabChange>
     @for (var index = 0; index < ds.Count; index++)
     {
-             var tabName = $"tab-{@index.ToString()}";
-            var tabNameDisplay = ds[index].Name;
-            var dsTable = ds[index];
-            this.table = dsTable;
-            <FluentTab Id=@tabName>
-                <Header>
-                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.LeafOne())" />
-                    @tabNameDisplay
-                </Header>
-                <Content>
-
+        var tabName = $"tab-{@index.ToString()}";
+        var tabNameDisplay = ds[index].Name;
+        var dsTable = ds[index];
+        this.table = dsTable;
+        <FluentTab Id=@tabName>
+            <Header>
+                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.LeafOne())" />
+                @tabNameDisplay
+            </Header>
+            <Content>
                 <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
-
-          
-                </Content>
-            </FluentTab>
+            </Content>
+        </FluentTab>
     }
 </FluentTabs>
 <div>

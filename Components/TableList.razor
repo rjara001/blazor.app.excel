@@ -1,0 +1,38 @@
+﻿@using BlazorAppExcel.Components.atomic
+@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+
+@inject IExcelService excelService
+
+@foreach (TableExcel table in tables)
+{
+    <div style="padding-top:20px">
+
+        <Card Table="@table" OnDelete="OnDelete"></Card>
+    </div>
+}
+
+@code {
+
+    private IList<TableExcel> tables = new List<TableExcel>();
+
+
+    private async void OnDelete(TableExcel table)
+    {
+        tables.Remove(table);
+        await this.excelService.Delete("user", table.Id);
+
+        this.StateHasChanged();
+    }
+
+    private string Url(string url)
+    {
+        return $"app/{url}";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        tables = await excelService.getTableExcels("user");
+    }
+}
+     

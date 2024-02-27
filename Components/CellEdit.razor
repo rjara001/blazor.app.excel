@@ -18,9 +18,13 @@
         
         break;
     case (int)Share.Enums.ExcelCellType.Decimal:
+        <CellDecimalElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDecimalElement>
+        break;
     case (int)Share.Enums.ExcelCellType.Currency:
+        <CellCurrencyElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellCurrencyElement>
+        break;
     case (int)Share.Enums.ExcelCellType.Porcentage:
-        <CellDecimalElement Type="@Item.Type" Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDecimalElement>
+        <CellPorcentageElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellPorcentageElement>
         break;
     default:
         <CellTextElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellTextElement>

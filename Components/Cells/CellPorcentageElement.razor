@@ -1,5 +1,9 @@
-﻿@using static BlazorAppExcel.Components.CellEdit
-<MudTextField T="string" @bind-Value="Value" Label="@Name" /> 
+﻿@using System.Text.RegularExpressions
+@using System.Globalization
+@using static BlazorAppExcel.Components.CellEdit
+@* <MudTextField T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" @onkeypress="KeyBoardEventHandler" /> *@
+
+<MudTextField Value="@Value" ValueChanged="@((string txt) => OnValueChanged(txt))" />
 @code {
 
     private string _value;
@@ -23,13 +27,23 @@
 
     [Parameter] public string Name { get; set; }
 
-    [Parameter] public IList<string> Values { get; set; }
-
-    private async Task<IEnumerable<string>> Search(string value)
+    private void OnValueChanged(string value)
     {
-// if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
-            return new string[0];
-        return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        string porcentageValue = Util.ExtractNumberFromString(value, Share.Enums.ExcelCellType.Porcentage);
+
+ 
+        try
+        {
+            double doubleValue = 0;
+            doubleValue = Convert.ToDouble(porcentageValue) / 100;
+            Value = String.Format("{0:P2}", doubleValue.ToString("P02", CultureInfo.CurrentCulture));
+        }
+        catch{}
+
     }
+
+    private void HandleError(string errorMessage) {
+        Console.WriteLine($"Mask error: {errorMessage}");
+    }
+
 }

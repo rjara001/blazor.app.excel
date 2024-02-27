@@ -11,14 +11,16 @@ using System.Text;
 public class Util
 {
 
-    public static TableExcel getDataTableFromSheet(ISheet sheet, string IdUser)
+    public static TableExcel getDataTableFromSheet(ISheet sheet, string IdUser, string nameFile)
     {
 
         IRow row = sheet.GetRow(0);
 
         int cc = row.LastCellNum>=12?12:row.LastCellNum;
 
-        TableExcel dt = new TableExcel(sheet.SheetName, IdUser);
+        TableExcel dt = new TableExcel("", sheet.SheetName, IdUser);
+        dt.FileName = nameFile;
+        dt.DateCreation = DateTime.Now;
 
         for (int i = 0; i < cc; i++)
         {
@@ -60,7 +62,7 @@ public class Util
 
         foreach (var item in sheets)
         {
-            ds.Add(getDataTableFromSheet(item, "user"));
+            ds.Add(getDataTableFromSheet(item, "user", e.File.Name));
         }
 
         return ds;
@@ -73,21 +75,21 @@ public class Util
         IList<ISheet> sheets = new List<ISheet>();
 
         using (var fileStream = e.File.OpenReadStream())
-        using (MemoryStream ms = new MemoryStream())
-        {
-            await fileStream.CopyToAsync(ms);
-
-            ms.Position = 0;
-
-            IWorkbook hssfwb = getWBFromType(sFileExtension, ms); // new HSSFWorkbook(ms);
-
-            var numberSheets = hssfwb.NumberOfSheets;
-            for (int i = 0; i < numberSheets; i++)
+            using (MemoryStream ms = new MemoryStream())
             {
-                sheets.Add(hssfwb.GetSheetAt(i));
-            }
+                await fileStream.CopyToAsync(ms);
 
-        }
+                ms.Position = 0;
+
+                IWorkbook hssfwb = getWBFromType(sFileExtension, ms);
+
+                var numberSheets = hssfwb.NumberOfSheets;
+                for (int i = 0; i < numberSheets; i++)
+                {
+                    sheets.Add(hssfwb.GetSheetAt(i));
+                }
+
+            }
 
         return sheets;
     }
