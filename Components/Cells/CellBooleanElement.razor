@@ -1,0 +1,31 @@
+﻿@* <MudSwitch @bind-Value="ValueString" Label="@Name"/> *@
+
+<MudField Label="@Name" Variant="Variant.Text" InnerPadding="false">
+    <MudRadioGroup T="string" @bind-Value="Value">
+        <MudRadio Value="@("true")" T="string">Yes</MudRadio>
+        <MudRadio Value="@("false")" T="string">No</MudRadio>
+    </MudRadioGroup>
+</MudField>
+
+@code {
+    private string _value;
+    [Parameter]
+    public EventCallback<string> OnChildParameterChanged { get; set; }
+
+    [Parameter] public string Value
+    {
+        get
+        {
+            return this._value; // =="Yes"?"true":"false";
+        }
+        set
+        {
+
+            if (_value == value) return;
+                this._value = value;
+            OnChildParameterChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter] public string Name { get; set; }
+}

@@ -8,7 +8,6 @@
 @using BlazorAppExcel.Share.Models
 
 @inject IJSRuntime JSRuntime
-@inject IDialogService DialogService
 
 @if (table == null)
 {
@@ -16,49 +15,11 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                @if (AllowedEdit)
-                {
-                    <th colspan="2">Edit</th>
-                }
-                @foreach (var column in table.Columns)
-                {
-                    <th>@column.Value</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-
-            @foreach (var (row, index) in table.Rows.Select((item, index) => (item, index)))
-            {
-                IList<string> columns = table.Columns.Select(_=>_.Value).ToList();
-       
-                <tr>
-
-                    @if (AllowedEdit)
-                    {
-                        <td>
-                            <button @onclick="@(e => OnEdit(row.getCellExcel(columns, table.Types, index)))">Edit</button>
-                        </td>
-                        <td>
-                            <button @onclick="@(e => Delete(index))">Delete</button>
-                        </td>
-                    }
-       
-                    @foreach (string cell in @row.Values)
-                    {
-                        <td>@cell</td>
-                    }
-                </tr>
-
-            }
-        </tbody>
-    </table>
+    <TableView Table="@table" AllowedEdit="@AllowedEdit" OnEdit="@OnEdit" OnDelete="@OnDelete"></TableView>
 }
 
 @code {
+    
     [Parameter]
     public bool AllowedEdit { get; set; } = false;
 
@@ -67,23 +28,6 @@ else
 
     [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
     [Parameter] public Action<int> OnDelete { get; set; }
-
-    private async void Delete(int index)
-    {
-        var parameters = new DialogParameters<SimpleDialog>();
-        parameters.Add(x => x.Title, $"Deleting row ({index})");
-
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
-
-        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
-        var _result = await _dialog.Result;
-        if (Convert.ToBoolean(_result.Data) == true)
-        {
-            OnDelete(index);
-        }
-    }
-
-    // [Parameter] public Action<RowCellExcel> OnSave { get; set; }
 
     private string tabName = string.Empty;
 
@@ -96,8 +40,5 @@ else
         tabName = table?.Name;
 
     }
-    public async Task UpdateTable(TableExcel table)
-    {
-        @* await JSRuntime.InvokeAsync<string>("loadGrid", $"#{table.Name}"); *@
-    }
+  
 }

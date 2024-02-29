@@ -14,7 +14,14 @@ public class Util
     public static TableExcel getDataTableFromSheet(ISheet sheet, string IdUser, string nameFile)
     {
 
-        IRow row = sheet.GetRow(0);
+        IRow row = null;
+        for (int i = 0; i < 20; i++)
+        {
+            if (row == null)
+                row = sheet.GetRow(i);
+            else
+                break;
+        }
 
         int cc = row.LastCellNum>=12?12:row.LastCellNum;
 

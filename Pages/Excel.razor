@@ -4,20 +4,34 @@
 @using NPOI.SS.UserModel
 @using NPOI.XSSF.UserModel
 @using System.Data
+@using BlazorAppExcel.Components.atomic
 
 @page "/excel"
 
 <h3>Import Excel</h3>
 
-<InputFile OnChange="@ImportFileExcel"></InputFile>
-
+@if (ds.Count()==0)
+{
+    <FileUpload OnChange="(e)=> ImportFileExcel(e)"></FileUpload>
+}
+else
+{
+    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="@clean"></MudIconButton>
+}
 <TabExcel ds=@ds></TabExcel>
 
 @code {
     IList<TableExcel> ds = new List<TableExcel>();
+
+    void clean()
+    {
+        ds = new List<TableExcel>();
+    }
+
     async Task ImportFileExcel(InputFileChangeEventArgs e)
     {
 
         ds = await Util.getDataSetAsync(e); 
+        this.StateHasChanged();
     }
 }

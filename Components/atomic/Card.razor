@@ -3,11 +3,22 @@
 @inject NavigationManager NavigationManager;
 @inject IUserSingletonService userServices;
 @inject IDialogService DialogService;
+@inject IExcelService excelService;
 
 <MudCard>
     <MudCardHeader>
         <CardHeaderContent>
-            <MudText Typo="Typo.h6">@Table.Name</MudText>
+
+            @if (!IsTitleEditable)
+            {
+                <MudText Typo="Typo.h6" onclick="@EnableEditTitle">
+                    @Table.Name
+                </MudText>
+            }
+            else
+            {
+                <MudTextField ShrinkLabel @bind-Value="Table.Name" Label="Tab Name" Variant="Variant.Text" OnBlur="DisableEditTitle"></MudTextField>
+            }
         </CardHeaderContent>
         <CardHeaderActions>
            
@@ -29,6 +40,20 @@
 
     [Parameter] public TableExcel Table { get; set; }
     [Parameter] public Action<TableExcel> OnDelete { get; set; }
+    bool IsTitleEditable = false;
+
+    private async void DisableEditTitle()
+    {
+    
+        IsTitleEditable = false;
+        await this.excelService.saveAsync(Table);
+     
+    }
+
+    private void EnableEditTitle()
+    {
+        IsTitleEditable = !IsTitleEditable;
+    }
 
     private async void Delete()
     {

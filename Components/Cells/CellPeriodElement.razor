@@ -1,0 +1,25 @@
+﻿@using System.Text.RegularExpressions
+@using static BlazorAppExcel.Components.CellEdit
+<MudTextField Mask="@(new PatternMask("00-0000"))" T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" />
+@code {
+
+    private string _value;
+
+    [Parameter] public string Value {
+        get
+        {
+            return this._value;
+        }
+        set
+        {
+            this._value = value;
+        } 
+    }
+
+    [Parameter] public string Name { get; set; }
+
+    private void HandleError(string errorMessage) {
+        Console.WriteLine($"Mask error: {errorMessage}");
+    }
+
+}

@@ -2,7 +2,6 @@
 @using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 @using Blazored.LocalStorage
-@using Microsoft.FluentUI.AspNetCore.Components
 @using System.Data
 @using System.Text.Json
 
@@ -21,27 +20,29 @@
     }
 </style>
 
-<FluentTabs ActiveTabId="tab-0" ActiveTabIdChanged=@tabChange>
-    @for (var index = 0; index < ds.Count; index++)
-    {
-        var tabName = $"tab-{@index.ToString()}";
-        var tabNameDisplay = ds[index].Name;
-        var dsTable = ds[index];
-        this.table = dsTable;
-        <FluentTab Id=@tabName>
-            <Header>
-                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.LeafOne())" />
-                @tabNameDisplay
-            </Header>
-            <Content>
-                <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
-            </Content>
-        </FluentTab>
-    }
-</FluentTabs>
-<div>
-    <button onclick="@save">Guardar</button>
-</div>
+@if (@ds.Count()>0)
+{
+    <MudButton OnClick="@save" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Small">Save</MudButton>
+
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+  
+        @for (var index = 0; index < ds.Count; index++)
+        {
+            var tabName = $"tab-{@index.ToString()}";
+            var tabNameDisplay = ds[index].Name;
+            var dsTable = ds[index];
+            this.table = dsTable;
+
+            <MudTabPanel Text="@tabNameDisplay">
+                <ChildContent>
+                    <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
+                </ChildContent>
+            </MudTabPanel>
+        }
+    </MudTabs>
+}
+
+
 
 @code {
     private TableDynamic childComponentRef;
@@ -50,7 +51,6 @@
     [Parameter]
     public IList<TableExcel> ds { get; set; } = new List<TableExcel>();
 
-    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
     string nameFilter = string.Empty;
 
     private void HandleCountryFilter(ChangeEventArgs args)
@@ -61,12 +61,6 @@
         }
     }
 
-    private async void tabChange(string nameTab) {
-        table = ds[Convert.ToInt16(nameTab.Replace("tab-", ""))];
-
-        await childComponentRef?.UpdateTable(table);
-
-    }
     private void HandleClear()
     {
         if (string.IsNullOrWhiteSpace(nameFilter))
@@ -82,8 +76,6 @@
             TableExcel _table = ds[index];
             await saveTable(_table);
         }
-
-
     }
 
     private async Task saveTable(TableExcel table)

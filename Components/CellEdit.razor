@@ -15,7 +15,6 @@
         break;
     case (int)Share.Enums.ExcelCellType.Number:
         <CellNumericElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellNumericElement>
-        
         break;
     case (int)Share.Enums.ExcelCellType.Decimal:
         <CellDecimalElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellDecimalElement>
@@ -25,6 +24,12 @@
         break;
     case (int)Share.Enums.ExcelCellType.Porcentage:
         <CellPorcentageElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellPorcentageElement>
+        break;
+    case (int)Share.Enums.ExcelCellType.Period:
+        <CellPeriodElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellPeriodElement>
+        break;
+    case (int)Share.Enums.ExcelCellType.Boolean:
+        <CellBooleanElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellBooleanElement>
         break;
     default:
         <CellTextElement Value="@Item.Value" Name="@Item.Name" OnChildParameterChanged="UpdateChildParameter"></CellTextElement>
