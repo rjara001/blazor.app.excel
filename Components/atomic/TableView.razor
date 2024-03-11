@@ -3,7 +3,6 @@
 
 @inject IDialogService DialogService
 
-
 <table class="table">
     <thead>
         <tr>
@@ -13,7 +12,7 @@
             }
             @foreach (var column in Table.Columns)
             {
-                <th>@column.Value</th>
+                <th><HeaderColumn Value="@column.Value" Name="Column" OnChildParameterChanged="(value)=>SaveColumn(column, value)"></HeaderColumn></th>
             }
         </tr>
     </thead>
@@ -58,15 +57,23 @@
     [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
     [Parameter] public Action<int> OnDelete { get; set; }
 
-    [Parameter]
-    public bool AllowedEdit { get; set; } = false;
+    [Parameter] public bool AllowedEdit { get; set; } = false;
+
+    [Parameter] public TableExcel Table { get; set; }
 
     [Parameter]
-    public TableExcel Table { get; set; }
+    public Action<KeyValuePair<string, string>> OnSaveColumn { get; set; }
 
     List<List<RowExcel>> rows = new List<List<RowExcel>>();
 
     public int IndexPag { get; set; } = 1;
+
+    private void SaveColumn(KeyValuePair<string, string> column, string value)
+    {
+        column = new KeyValuePair<string, string>(column.Key, value);
+
+        OnSaveColumn(column);
+    }
 
     protected override void OnInitialized()
     {

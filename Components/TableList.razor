@@ -1,8 +1,19 @@
 ﻿@using BlazorAppExcel.Components.atomic
 @using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
+@using Blazored.LocalStorage
+@using Newtonsoft.Json
 
 @inject IExcelService excelService
+@inject ISessionSingletonService session
+@inject ILocalStorageService localStorage
+
+@if (loading)
+{
+    <div class="spinner-container">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </div>
+}
 
 @foreach (TableExcel table in tables)
 {
@@ -16,7 +27,7 @@
 
     private IList<TableExcel> tables = new List<TableExcel>();
 
-
+    bool loading = false;
     private async void OnDelete(TableExcel table)
     {
         tables.Remove(table);
@@ -27,12 +38,19 @@
 
     private string Url(string url)
     {
-        return $"app/{url}";
+        return $"work/tables/{url}";
     }
 
     protected override async Task OnInitializedAsync()
     {
-        tables = await excelService.getTableExcels("user");
+        loading = true;
+       
+        var user = await this.excelService.GetUser("user");
+
+        await this.session.SetUser(user);
+
+        tables = this.session.User.TablesToList();
+        loading = false;
     }
 }
      

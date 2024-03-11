@@ -18,12 +18,13 @@ builder.Services.AddHttpClient("MyNamedClient", client =>
 {
     var url = builder.Configuration["ServerUrl:BaseAddress"];
     client.BaseAddress = new Uri(url);
+    client.Timeout = TimeSpan.FromSeconds(60000);
     // You can configure other properties of HttpClient here if needed
 });
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddTransient<IExcelService, ExcelService>();
-builder.Services.AddSingleton<IUserSingletonService, UserSingletonService>();
+builder.Services.AddSingleton<ISessionSingletonService, SessionSingletonService>();
 
 
 await builder.Build().RunAsync();

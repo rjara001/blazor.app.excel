@@ -9,7 +9,7 @@
 @inject IExcelService excelService
 @inject ILocalStorageService localStore
 @inject MudBlazor.IDialogService DialogService
-@inject IUserSingletonService userServices;
+@inject ISessionSingletonService userServices;
 
 <style>
     .data-item {
@@ -80,17 +80,10 @@
 
     private async Task saveTable(TableExcel table)
     {
-        await this.excelService.saveAsync(table);
+        await this.excelService.setUser(userServices.User, table);
 
-        var user = await localStore.GetItemAsync<User>("user");
-
-        if (user == null)
-        {
-            this.userServices.User = new User();
-            this.userServices.User.AddTable(table);
-            // await localStore.SetItemAsync<User>("user", user);
-        }
-
+        this.userServices.User.AddTable(table);
+  
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
         var parameters = new MudBlazor.DialogParameters<SimpleDialog>();

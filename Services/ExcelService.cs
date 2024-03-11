@@ -1,10 +1,9 @@
 ﻿using Amazon.Runtime;
 using BlazorAppExcel.Interfaces;
 using BlazorAppExcel.Models;
-using System.Net.Http;
+using Blazored.LocalStorage;
+using Newtonsoft.Json;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace BlazorAppExcel.Services
 {
@@ -12,13 +11,32 @@ namespace BlazorAppExcel.Services
     {
         private readonly string baseUrl;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILocalStorageService _localStore;
         private readonly IConfiguration config;
 
-        public ExcelService(IHttpClientFactory client, IConfiguration config) {
+        public ExcelService(IHttpClientFactory client, IConfiguration config, ILocalStorageService localStore) {
             this._httpClientFactory = client;
+            this._localStore = localStore;
         }
 
-        public async Task<IList<TableExcel>> getTableExcels(string user)
+        public async Task<User> GetUser(string nameUser)
+        {
+            User _user = await getUserFromLocalStorage(nameUser);
+
+            if (_user != null) return _user;
+
+            _user = new User();
+            _user.Name = nameUser;
+
+            _user.SetTables(await this.getTables(nameUser));
+
+            await this._localStore.SetItemAsync<User>("__user", _user);
+
+            return _user;
+
+        }
+
+        private async Task<IList<TableExcel>> getTables(string user)
         {
             var httpClient = _httpClientFactory.CreateClient("MyNamedClient");
 
@@ -33,18 +51,20 @@ namespace BlazorAppExcel.Services
                 string responseData = await response.Content.ReadAsStringAsync();
 
                 // Print the response data
-                if (responseData!=null)
-                    return JsonSerializer.Deserialize<IList<TableExcel>>(responseData);
+                if (responseData != null)
+                    return JsonConvert.DeserializeObject<IList<TableExcel>>(responseData);
             }
 
             return new List<TableExcel>();
         }
 
-        public async Task saveAsync(TableExcel model)
+        public async Task setUser(User user, TableExcel table)
         {
+            await this._localStore.SetItemAsync<User>("__user", user);
+
             var httpClient = _httpClientFactory.CreateClient("MyNamedClient");
 
-            var content = new StringContent(JsonSerializer.Serialize(model), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             await httpClient.PostAsync("excel", content);
         }
 
@@ -55,5 +75,16 @@ namespace BlazorAppExcel.Services
             await httpClient.DeleteAsync($"excel/{idUser}/{id}");
         }
 
+        async Task<User> getUserFromLocalStorage(string nameUser)
+        {
+            if (await this._localStore.ContainKeyAsync("__user"))
+            {
+                string _json = await this._localStore.GetItemAsync<string>("__user");
+
+                return JsonConvert.DeserializeObject<User>(_json);
+            }
+
+            return null;
+        }
     }
 }

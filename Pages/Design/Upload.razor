@@ -6,9 +6,13 @@
 @using System.Data
 @using BlazorAppExcel.Components.atomic
 
-@page "/excel"
+@page "/design/upload"
 
 <h3>Import Excel</h3>
+@if (loading)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" b/>
+}
 
 @if (ds.Count()==0)
 {
@@ -21,6 +25,8 @@ else
 <TabExcel ds=@ds></TabExcel>
 
 @code {
+    bool loading = false;
+
     IList<TableExcel> ds = new List<TableExcel>();
 
     void clean()
@@ -30,8 +36,11 @@ else
 
     async Task ImportFileExcel(InputFileChangeEventArgs e)
     {
+        loading = true;
 
-        ds = await Util.getDataSetAsync(e); 
+        ds = await Util.getDataSetAsync(e);
+        loading = false;
+
         this.StateHasChanged();
     }
 }

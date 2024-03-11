@@ -1,7 +1,7 @@
 ﻿@using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 @inject NavigationManager NavigationManager;
-@inject IUserSingletonService userServices;
+@inject ISessionSingletonService user;
 @inject IDialogService DialogService;
 @inject IExcelService excelService;
 
@@ -46,8 +46,7 @@
     {
     
         IsTitleEditable = false;
-        await this.excelService.saveAsync(Table);
-     
+        await this.excelService.setUser(user.User, Table);
     }
 
     private void EnableEditTitle()
@@ -70,9 +69,9 @@
 
     public void Go()
     {
-        this.userServices.User.TableActive = Table;
+        this.user.SetTableActive(Table);
 
-        NavigationManager.NavigateTo($"app/{Table.CodeName}");
+        NavigationManager.NavigateTo($"work/tables/{Table.Name}");
     }
 
     private string getFileNameValue()

@@ -3,12 +3,19 @@
 @using Models
 
 @inject IExcelService excelService
-@inject IUserSingletonService userServices;
+@inject ISessionSingletonService userServices;
 @inject NavigationManager NavigationManager;
 
 <MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Href="/excel" Match="NavLinkMatch.Prefix">Excel</MudNavLink>
+    <MudNavGroup Title="Design" Expanded="true">
+        <MudNavLink Href="/design/upload">Upload</MudNavLink>
+        <MudNavLink Href="/design/tables">Tables</MudNavLink>
+        <MudNavLink Href="/design/columns">Columns</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Title="Work Area" Expanded="true">
+        <MudNavLink Href="/work/tables">Tables</MudNavLink>
+    </MudNavGroup>
     <MudNavLink Href="/about"  Match="NavLinkMatch.Prefix">About</MudNavLink>
 </MudNavMenu>
 
@@ -23,16 +30,8 @@
     {
         this.userServices.User.TableActive = table;
 
-        NavigationManager.NavigateTo($"app/{table.CodeName}");
+        NavigationManager.NavigateTo($"work/tables/{table.Name}");
         // Href =@($"app/{@table.CodeName}"
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        tables = await excelService.getTableExcels("user");
-
-        this.userServices.User = new User(tables.ToDictionary(obj => obj.Name));
-
     }
 
     private void ToggleNavMenu()

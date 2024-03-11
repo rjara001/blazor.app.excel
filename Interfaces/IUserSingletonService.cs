@@ -2,8 +2,12 @@
 
 namespace BlazorAppExcel.Interfaces
 {
-    public interface IUserSingletonService
+    public interface ISessionSingletonService
     {
-        public User User { get; set; }   
+        public User User { get; }
+
+        Task SetUser(User user);
+
+        void SetTableActive(TableExcel table);
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/app/{value}"
+﻿@page "/work/tables/{value}"
 @using BlazorAppExcel.Components
 @using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
@@ -7,7 +7,7 @@
 @using Blazored.LocalStorage
 @using BlazorAppExcel.Share.Models;
 
-@inject IUserSingletonService userServices;
+@inject ISessionSingletonService session;
 @inject IDialogService DialogService;
 @inject IExcelService excelService
 
@@ -21,7 +21,7 @@
     <i class="glyphicon glyphicon-plus"></i> Settings
 </button>
 
-<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true"></TableDynamic>
+<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true" OnSaveColumn="OnSaveColumn"></TableDynamic>
 
 @code {
     private TableExcel table;                                                                                                
@@ -39,10 +39,18 @@
         {
             var item = this.table.Rows[index];
             this.table.Rows.Remove(item);
-            await this.excelService.saveAsync(this.table);
+            await this.excelService.setUser(session.User, this.table);
 
             this.StateHasChanged();
         }
+    }
+
+    private async void OnSaveColumn(KeyValuePair<string, string> column)
+    {
+        
+        this.table.Columns[column.Key] = column.Value;
+
+        await this.excelService.setUser(session.User, this.table);
     }
 
     private void Edit(RowCellExcel row)
@@ -87,14 +95,14 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        table = userServices.User.TableActive;
+        table = session.User.TableActive;
     }
 
     public async void OnSaveType(IList<int> types)
     {
         this.table.Types = types;
 
-        await this.excelService.saveAsync(this.table);
+        await this.excelService.setUser(session.User, this.table);
 
         _dialogSettings.Close();
 
@@ -108,8 +116,7 @@
         {
             item = row.NewRowExcel();
             this.table.Rows.Add(item);
-        }
-      
+        }      
         else
             item = this.table.Rows[row.Id];
 
@@ -118,7 +125,7 @@
             item.Values[i] = row.Cells[i].Value;
         }
 
-        await this.excelService.saveAsync(this.table);
+        await this.excelService.setUser(session.User, this.table);
 
         _dialogTable.Close();
 

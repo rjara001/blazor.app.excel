@@ -1,0 +1,50 @@
+﻿@if (!IsTitleEditable)
+{
+    <MudText onclick="@EnableEditTitle">
+        @Value
+    </MudText>
+}
+else
+{
+    <MudTextField ShrinkLabel @bind-Value="@Value" Variant="Variant.Text" OnBlur="DisableEditTitle"></MudTextField>
+}
+
+@code {
+    private bool IsTitleEditable { get; set; }
+    private string _value { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnChildParameterChanged { get; set; }
+
+    [Parameter] public string Value 
+    { 
+        get
+        {
+            return this._value;
+        } set
+        {
+            if (_value == value) return;
+                this._value = value;
+
+            OnChildParameterChanged.InvokeAsync(value.ToString());
+
+        } 
+    }
+
+    [Parameter] public string Name { get; set; }
+
+    [Parameter] public Action OnSave {get;set;}
+
+    private void EnableEditTitle()
+    {
+        IsTitleEditable = !IsTitleEditable;
+    }
+
+    private async void DisableEditTitle()
+    {
+
+        IsTitleEditable = false;
+        OnSave();
+
+    }
+}

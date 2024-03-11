@@ -1,0 +1,125 @@
+﻿@using BlazorAppExcel.Components.Cells
+@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+@using BlazorAppExcel.Share.Enums
+@using BlazorAppExcel.Share.Models
+@using System.Linq;
+
+@inject ISessionSingletonService session
+@inject IExcelService excel;
+
+@page "/design/columns/{IdTableSelected?}"
+
+Count: @this.session.User.TablesToList().Count()
+
+@if (this.session.User.TablesToList().Count()>0)
+{
+  
+    <MudSelect Dense="true" T="string" Label="Tables" Variant="Variant.Text" @bind-Value="@IdTableSelected">
+    @foreach (var item in this.session.User.TablesToList())
+    {
+        <MudSelectItem Value="@item.Id">@(item.Name)</MudSelectItem>
+    }
+    </MudSelect>
+
+<MudButton OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</MudButton>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>Name</th>
+            <th>Type</th>
+
+        </tr>
+    </thead>
+    <tbody>
+            @if (TableSelected!=null)
+            {
+                @for (int index = 0; index < this.TableSelected.GetColumnTables.Count; index++)
+                {
+                    ColumnTable item = this.TableSelected.GetColumnTables[index];
+                    var typeSelected = item.Type.ToString();
+
+                    <tr>
+                        <td>
+                            @item.Name
+                        </td>
+                        <td>
+                            <CellSelectElement Index="@index" Value="@typeSelected" Values="@GetTypes()" OnChildParameterChanged="@((KeyValuePair<int, string> e)=>UpdateType(e, item))"></CellSelectElement>
+                        </td>
+
+                    </tr>
+                }
+            }
+
+        }   
+
+
+    </tbody>
+</table>
+
+
+@code {
+    [Parameter] public string IdTableSelected { get; set; }
+
+    private string IdColumn { get; set; }
+
+
+    private async void UpdateType(KeyValuePair<int, string> e, ColumnTable item)
+    {
+        int index = Convert.ToInt16(e.Key);
+        int value = Convert.ToInt16(e.Value);
+
+        this.TableSelected.GetColumnTables[e.Key].Type = (ExcelCellType)value;
+        this.TableSelected.Types[index] = value;
+
+        session.User.Tables[this.TableSelected.Id] = this.TableSelected;
+
+        await excel.setUser(session.User, TableSelected);
+    }
+    private IDictionary<string,string> GetTypes()
+    {
+        var obj = Enum.GetValues(typeof(ExcelCellType)).Cast<ExcelCellType>().ToDictionary(
+                                                                        e => ((int)e).ToString(),
+                                                                        e => e.ToString());
+
+        return obj;
+    }
+    void EditingItemAsync(ColumnTable item)
+    {
+        Console.WriteLine(item);
+
+    }
+
+    void AddItem()
+    {
+        this.TableSelected.GetColumnTables.Add(new ColumnTable() { Name = "new column", Type = ExcelCellType.String });//new KeyValuePair<string, string>("new column", "new column"));
+    }
+
+    private TableExcel TableSelected
+    {
+        get
+        {
+            if (this.TableList.Count()>0)
+            {
+                if (this.IdTableSelected == null)
+                    this.IdTableSelected = this.TableList[0].Id;
+
+                var item = this.TableList.FirstOrDefault(_ => _.Id == this.IdTableSelected) ?? new TableExcel();
+                return item;
+            }
+            return null;
+
+        }
+    }
+
+    private IList<TableExcel> TableList
+    {
+        get
+        {
+            return this.session.User.TablesToList();
+        }
+    }
+}

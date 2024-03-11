@@ -23,13 +23,13 @@ public class Util
                 break;
         }
 
-        int cc = row.LastCellNum>=12?12:row.LastCellNum;
+        int numColumns = row.LastCellNum>=12?12:row.LastCellNum;
 
         TableExcel dt = new TableExcel("", sheet.SheetName, IdUser);
         dt.FileName = nameFile;
         dt.DateCreation = DateTime.Now;
 
-        for (int i = 0; i < cc; i++)
+        for (int i = 0; i < numColumns; i++)
         {
             ICell cell = row.GetCell(i);
             
@@ -39,21 +39,20 @@ public class Util
 
         for (int i = sheet.FirstRowNum + 1; i <= sheet.LastRowNum; i++)
         {
-            var r = sheet.GetRow(i);
-            RowExcel _row = new RowExcel();
-            dt.Rows.Add(_row);
+            var rowSheet = sheet.GetRow(i);
+            RowExcel rowExcel = new RowExcel();
+            dt.Rows.Add(rowExcel);
 
             int index = 0;
-            if (r != null)
-                for (int j = r.FirstCellNum; j < cc; j++)
+            if (rowSheet != null)
+                for (int j = rowSheet.FirstCellNum; j < numColumns; j++)
                 {
                     index++;
-                    if (r.GetCell(j) != null)
-                    {
-                        var item = r.GetCell(j).ToString();
-                        if (item!=null)
-                            _row.setValue(item);
-                    }
+               
+                    string item = rowSheet.GetCell(j)==null?String.Empty: rowSheet.GetCell(j).ToString();
+                      
+                    rowExcel.setValue(item);
+                    
                 }
         }
 
