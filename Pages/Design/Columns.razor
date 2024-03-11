@@ -10,116 +10,50 @@
 
 @page "/design/columns/{IdTableSelected?}"
 
-Count: @this.session.User.TablesToList().Count()
-
-@if (this.session.User.TablesToList().Count()>0)
-{
-  
-    <MudSelect Dense="true" T="string" Label="Tables" Variant="Variant.Text" @bind-Value="@IdTableSelected">
-    @foreach (var item in this.session.User.TablesToList())
-    {
-        <MudSelectItem Value="@item.Id">@(item.Name)</MudSelectItem>
-    }
-    </MudSelect>
-
-<MudButton OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</MudButton>
-}
-
-<table class="table">
-    <thead>
-        <tr>
-
-            <th>Name</th>
-            <th>Type</th>
-
-        </tr>
-    </thead>
-    <tbody>
-            @if (TableSelected!=null)
+<MudGrid>
+    <MudItem xs="12">
+        <MudSelect T="Parts" Label="Parts" ToStringFunc="@converter" HelperText="Pick the Parts" @bind-Value="@options">
+            @foreach (var part in parts)
             {
-                @for (int index = 0; index < this.TableSelected.GetColumnTables.Count; index++)
-                {
-                    ColumnTable item = this.TableSelected.GetColumnTables[index];
-                    var typeSelected = item.Type.ToString();
-
-                    <tr>
-                        <td>
-                            @item.Name
-                        </td>
-                        <td>
-                            <CellSelectElement Index="@index" Value="@typeSelected" Values="@GetTypes()" OnChildParameterChanged="@((KeyValuePair<int, string> e)=>UpdateType(e, item))"></CellSelectElement>
-                        </td>
-
-                    </tr>
-                }
+                <MudSelectItem Value="@part"></MudSelectItem>
             }
-
-        }   
-
-
-    </tbody>
-</table>
-
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="12">
+        <br /><br />
+        Selected parts: @options;
+    </MudItem>
+</MudGrid>
 
 @code {
-    [Parameter] public string IdTableSelected { get; set; }
 
-    private string IdColumn { get; set; }
-
-
-    private async void UpdateType(KeyValuePair<int, string> e, ColumnTable item)
+    IEnumerable<Parts> parts = new List<Parts>()
     {
-        int index = Convert.ToInt16(e.Key);
-        int value = Convert.ToInt16(e.Value);
+        new Parts() {PartID = 1, PartValue = "Audi"},
+        new Parts() {PartID = 2, PartValue = "BMW"},
+        new Parts() {PartID = 3, PartValue = "Chevrolet"},
+        new Parts() {PartID = 4, PartValue = "Ferrari"},
+        new Parts() {PartID = 5, PartValue = "Porsche"},
+        new Parts() {PartID = 6, PartValue = "Renault"}
+    };
 
-        this.TableSelected.GetColumnTables[e.Key].Type = (ExcelCellType)value;
-        this.TableSelected.Types[index] = value;
+    public Parts options { get; set; }
 
-        session.User.Tables[this.TableSelected.Id] = this.TableSelected;
-
-        await excel.setUser(session.User, TableSelected);
-    }
-    private IDictionary<string,string> GetTypes()
+    public class Parts
     {
-        var obj = Enum.GetValues(typeof(ExcelCellType)).Cast<ExcelCellType>().ToDictionary(
-                                                                        e => ((int)e).ToString(),
-                                                                        e => e.ToString());
-
-        return obj;
-    }
-    void EditingItemAsync(ColumnTable item)
-    {
-        Console.WriteLine(item);
-
-    }
-
-    void AddItem()
-    {
-        this.TableSelected.GetColumnTables.Add(new ColumnTable() { Name = "new column", Type = ExcelCellType.String });//new KeyValuePair<string, string>("new column", "new column"));
-    }
-
-    private TableExcel TableSelected
-    {
-        get
+        public int PartID { get; set; }
+        public string PartValue { get; set; }
+        public override bool Equals(object o)
         {
-            if (this.TableList.Count()>0)
-            {
-                if (this.IdTableSelected == null)
-                    this.IdTableSelected = this.TableList[0].Id;
-
-                var item = this.TableList.FirstOrDefault(_ => _.Id == this.IdTableSelected) ?? new TableExcel();
-                return item;
-            }
-            return null;
-
+            var other = o as Parts;
+            return other?.PartID == PartID;
+        }
+        public override int GetHashCode() => PartID.GetHashCode();
+        public override string ToString()
+        {
+            return PartValue;
         }
     }
 
-    private IList<TableExcel> TableList
-    {
-        get
-        {
-            return this.session.User.TablesToList();
-        }
-    }
-}
+    Func<Parts, string> converter = p => p?.PartValue;
+} 
