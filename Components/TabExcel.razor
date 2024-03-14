@@ -80,7 +80,8 @@
 
     private async Task saveTable(TableExcel table)
     {
-        await this.excelService.setUser(userServices.User, table);
+
+        await this.excelService.SetUser(userServices.User, table);
 
         this.userServices.User.AddTable(table);
   

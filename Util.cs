@@ -34,7 +34,7 @@ public class Util
             ICell cell = row.GetCell(i);
             
             if (cell?.ToString().Length > 0)
-                dt.setColumns(cell.ToString(), i);
+                dt.setColumns(cell.ToString());
         }
 
         for (int i = sheet.FirstRowNum + 1; i <= sheet.LastRowNum; i++)
@@ -117,7 +117,7 @@ public class Util
 
     private static void calculateUniqueValues(int index, TableExcel tableExcel)
     {
-        var column = tableExcel.Columns[$"Column{index+1}"];
+        var column = tableExcel.Columns[index];
 
         try
         {

@@ -10,9 +10,11 @@
             {
                 <th colspan="2">Edit</th>
             }
-            @foreach (var column in Table.Columns)
+            @for (int index = 0; index<Table.Columns.Count();index++)
             {
-                <th><HeaderColumn Value="@column.Value" Name="Column" OnChildParameterChanged="(value)=>SaveColumn(column, value)"></HeaderColumn></th>
+                var column = Table.Columns[index];
+                var indexItem = index;
+                <th><HeaderColumn Value="@column" Name="Column" OnChildParameterChanged="(value)=>SaveColumn(indexItem, value)"></HeaderColumn></th>
             }
         </tr>
     </thead>
@@ -24,7 +26,7 @@
 
             @foreach (var (row, index) in rows[IndexPag - 1].Select((item, index) => (item, index)))
             {
-                IList<string> columns = Table.Columns.Select(_ => _.Value).ToList();
+                IList<string> columns = Table.Columns;
 
                 <tr>
 
@@ -62,17 +64,16 @@
     [Parameter] public TableExcel Table { get; set; }
 
     [Parameter]
-    public Action<KeyValuePair<string, string>> OnSaveColumn { get; set; }
+    public Action<int, string> OnSaveColumn { get; set; }
 
     List<List<RowExcel>> rows = new List<List<RowExcel>>();
 
     public int IndexPag { get; set; } = 1;
 
-    private void SaveColumn(KeyValuePair<string, string> column, string value)
+    private void SaveColumn(int index, string value)
     {
-        column = new KeyValuePair<string, string>(column.Key, value);
 
-        OnSaveColumn(column);
+        OnSaveColumn(index, value);
     }
 
     protected override void OnInitialized()

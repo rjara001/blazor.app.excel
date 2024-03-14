@@ -39,18 +39,19 @@
         {
             var item = this.table.Rows[index];
             this.table.Rows.Remove(item);
-            await this.excelService.setUser(session.User, this.table);
+
+            await this.excelService.SetUser(session.User, table);
 
             this.StateHasChanged();
         }
     }
 
-    private async void OnSaveColumn(KeyValuePair<string, string> column)
+    private async void OnSaveColumn(int index, string value)
     {
         
-        this.table.Columns[column.Key] = column.Value;
+        this.table.Columns[index] = value;
 
-        await this.excelService.setUser(session.User, this.table);
+        await this.excelService.SetUser(session.User, this.table);
     }
 
     private void Edit(RowCellExcel row)
@@ -67,7 +68,7 @@
 
     private void AddNew()
     {
-        IList<string> columns = table.Columns.Values.Select(value => value.ToString()).ToList();
+        IList<string> columns = table.Columns;
 
         RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Types, table.Rows.Count()+1);
 
@@ -85,7 +86,7 @@
     private void Settings()
     {
         var parameters = new DialogParameters<SettingsDialog>();
-        parameters.Add(x => x.Columns, this.table.Columns.Values.ToList());
+        parameters.Add(x => x.Columns, this.table.Columns);
         parameters.Add(x => x.Types, this.table.Types);
         parameters.Add(x => x.Save, this.OnSaveType);
 
@@ -102,7 +103,7 @@
     {
         this.table.Types = types;
 
-        await this.excelService.setUser(session.User, this.table);
+        await this.excelService.SetUser(session.User, table);
 
         _dialogSettings.Close();
 
@@ -125,7 +126,7 @@
             item.Values[i] = row.Cells[i].Value;
         }
 
-        await this.excelService.setUser(session.User, this.table);
+        await this.excelService.SetUser(session.User, table);
 
         _dialogTable.Close();
 

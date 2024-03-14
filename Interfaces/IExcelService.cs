@@ -5,7 +5,7 @@ namespace BlazorAppExcel.Interfaces
 {
     public interface IExcelService
     {
-        Task setUser(User user, TableExcel table);
+        Task SetUser(User user, TableExcel table);
         //Task<IList<TableExcel>> getTableExcels(string user);
 
         Task<User> GetUser(string user);

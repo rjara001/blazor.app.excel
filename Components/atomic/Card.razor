@@ -36,7 +36,7 @@
     </MudCardActions>
 </MudCard>
 
-    @code {
+@code {
 
     [Parameter] public TableExcel Table { get; set; }
     [Parameter] public Action<TableExcel> OnDelete { get; set; }
@@ -44,9 +44,10 @@
 
     private async void DisableEditTitle()
     {
-    
+
         IsTitleEditable = false;
-        await this.excelService.setUser(user.User, Table);
+
+        await this.excelService.SetUser(user.User, Table);
     }
 
     private void EnableEditTitle()

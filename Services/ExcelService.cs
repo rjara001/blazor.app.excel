@@ -58,13 +58,16 @@ namespace BlazorAppExcel.Services
             return new List<TableExcel>();
         }
 
-        public async Task setUser(User user, TableExcel table)
+        public async Task SetUser(User user, TableExcel table)
         {
+
+            user.Tables[table.Name] = table;
+
             await this._localStore.SetItemAsync<User>("__user", user);
 
             var httpClient = _httpClientFactory.CreateClient("MyNamedClient");
 
-            var content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(table), Encoding.UTF8, "application/json");
             await httpClient.PostAsync("excel", content);
         }
 

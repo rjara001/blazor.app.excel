@@ -28,7 +28,7 @@ else
 
     [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
     [Parameter] public Action<int> OnDelete { get; set; }
-    [Parameter] public Action<KeyValuePair<string, string>> OnSaveColumn { get; set; }
+    [Parameter] public Action<int, string> OnSaveColumn { get; set; }
 
     private string tabName = string.Empty;
 

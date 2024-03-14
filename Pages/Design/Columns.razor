@@ -1,4 +1,5 @@
 ﻿@using BlazorAppExcel.Components.Cells
+@using BlazorAppExcel.Components.atomic
 @using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 @using BlazorAppExcel.Share.Enums
@@ -7,53 +8,223 @@
 
 @inject ISessionSingletonService session
 @inject IExcelService excel;
+@inject IDialogService DialogService;
 
 @page "/design/columns/{IdTableSelected?}"
 
-<MudGrid>
-    <MudItem xs="12">
-        <MudSelect T="Parts" Label="Parts" ToStringFunc="@converter" HelperText="Pick the Parts" @bind-Value="@options">
-            @foreach (var part in parts)
+@if (_tables != null && _tables.Count() > 0)
+{
+    <MudGrid>
+        <MudItem xs="12">
+
+            <MudSelect T="TableExcel" Label="Tables" ToStringFunc="@converter" Variant="Variant.Text" @bind-Value="@TableSelected">
+                @foreach (var item in this._tables)
+                {
+                    <MudSelectItem Value="@item"></MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+      
+    </MudGrid>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Type</th>
+
+        </tr>
+    </thead>
+    <tbody>
+            @if (TableSelected!=null)
             {
-                <MudSelectItem Value="@part"></MudSelectItem>
+                
+                @for (int index = 0; index < this.TableSelected.GetColumnTables.Count; index++)
+                {
+                    ColumnTable item = this.TableSelected.GetColumnTables[index];
+                    var indexItem = index;
+                <tr>
+                    <td>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>OnDeleteItem(item, indexItem))"></MudIconButton>
+                    </td>
+                        <td>
+                            @if (this._editableNameColumn == item.Key)
+                            {
+                            <MudTextField T="string" Value="@item.Name" Label="Column Name" ValueChanged="@((value)=>OnSaveChanges(value, item, indexItem))" />
+                            }
+                            else
+                            {
+                                <MudText onclick="@(()=>EditNameColumn(item.Key))">@item.Name</MudText>
+                            }
+                        </td>
+                        <td>
+                            @if (this._editableTypeColumn == item.Key)
+                            {
+                            <CellSelectElement Index="@index" Value="@item.Type.ToString()" Values="@GetTypes()" OnChildParameterChanged="@((KeyValuePair<int, string> e)=>UpdateType(e, item))"></CellSelectElement>
+             @*                <MudSelect T="ExcelCellType" Label="Tables" ToStringFunc="@converterEnum" Variant="Variant.Text" ValueChanged="@((value)=>OnSaveTypeChanges(value, indexItem))">
+                                @foreach (var item in GetTypes())
+                                    {
+                                        <MudSelectItem Value="@item"></MudSelectItem>
+                                    }
+                                </MudSelect>
+ *@
+                            }
+                            else
+                            {
+                            <MudText onclick="@(()=>EditTypeColumn(item.Key))">@item.Type.ToString()</MudText>
+                            }
+                    </td>
+
+                    </tr>
+                }
             }
-        </MudSelect>
-    </MudItem>
-    <MudItem xs="12">
-        <br /><br />
-        Selected parts: @options;
-    </MudItem>
-</MudGrid>
+    </tbody>
+</table>
+
+<MudButton OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</MudButton>
+
 
 @code {
+    private string _idTableSelected = null;
+    private TableExcel TableSelected;
+    private IList<TableExcel> _tables = null;
+    private string _editableTypeColumn = string.Empty;
+    private string _editableNameColumn = string.Empty;
 
-    IEnumerable<Parts> parts = new List<Parts>()
-    {
-        new Parts() {PartID = 1, PartValue = "Audi"},
-        new Parts() {PartID = 2, PartValue = "BMW"},
-        new Parts() {PartID = 3, PartValue = "Chevrolet"},
-        new Parts() {PartID = 4, PartValue = "Ferrari"},
-        new Parts() {PartID = 5, PartValue = "Porsche"},
-        new Parts() {PartID = 6, PartValue = "Renault"}
-    };
-
-    public Parts options { get; set; }
-
-    public class Parts
-    {
-        public int PartID { get; set; }
-        public string PartValue { get; set; }
-        public override bool Equals(object o)
+    [Parameter] public string IdTableSelected { get
         {
-            var other = o as Parts;
-            return other?.PartID == PartID;
+            if (this._tables.Count() > 0 && this._idTableSelected == null)
+                this._idTableSelected = this._tables[0].Id;
+
+            return this._idTableSelected;
         }
-        public override int GetHashCode() => PartID.GetHashCode();
-        public override string ToString()
+        set
         {
-            return PartValue;
+            this._idTableSelected = value;
         }
     }
 
-    Func<Parts, string> converter = p => p?.PartValue;
-} 
+    private string IdColumn { get; set; }
+
+    private async void OnDeleteItem(ColumnTable item, int index)
+    {
+        var parameters = new DialogParameters<SimpleDialog>();
+        parameters.Add(x => x.Title, $"Deleting {item.Name}");
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
+        var _result = await _dialog.Result;
+        if (Convert.ToBoolean(_result.Data) == true)
+            DeleteColumn(item, index);
+    }
+
+    private async void DeleteColumn(ColumnTable item, int index)
+    {
+        TableSelected.Types.RemoveAt(index);
+        TableSelected.Columns.Remove(item.Key);
+
+        foreach (RowExcel row in TableSelected.Rows)
+        {
+            row.Values.RemoveAt(index);
+        }
+
+        await excel.SetUser(session.User, TableSelected);
+
+        this.StateHasChanged();
+    }
+
+    private async void OnSaveTypeChanges(ExcelCellType type, int index)
+    {
+
+        TableSelected.Types[index] = (int)type;
+
+        await excel.SetUser(session.User, TableSelected);
+    }
+
+    private async Task OnSaveChanges(string value, ColumnTable item, int index)
+    {
+
+        TableSelected.Columns[index] = value;
+
+        TableSelected.Types[index] = (int)item.Type;
+
+        await excel.SetUser(session.User, TableSelected);
+    }
+
+    private async void UpdateType(KeyValuePair<int, string> e, ColumnTable item)
+    {
+        int index = Convert.ToInt16(e.Key);
+        int value = Convert.ToInt16(e.Value);
+
+        item.Type = (ExcelCellType)value;
+
+        await OnSaveChanges(item.Name, item, index);
+    }
+
+    private void EditTypeColumn(string keyColumn)
+    {
+
+        this._editableTypeColumn = keyColumn;
+        this.StateHasChanged();
+    }
+
+    private void EditNameColumn(string keyColumn)
+    {
+
+        this._editableNameColumn = keyColumn;
+        this.StateHasChanged();
+    }
+
+    // private List<ExcelCellType> GetTypes()
+    // {
+    //     var obj = Enum.GetValues(typeof(ExcelCellType))
+    //                                        .Cast<ExcelCellType>()
+    //                                        .ToList();
+
+    //     return obj;
+    // }
+    private IDictionary<string, string> GetTypes()
+    {
+        var obj = Enum.GetValues(typeof(ExcelCellType)).Cast<ExcelCellType>().ToDictionary(
+                                                                        e => ((int)e).ToString(),
+                                                                        e => e.ToString());
+
+        return obj;
+    }
+
+    void AddItem()
+    {
+
+        this.TableSelected.Columns.Add("new column");
+        this.TableSelected.Types.Add((int)Share.Enums.ExcelCellType.String);
+
+        foreach (RowExcel row in TableSelected.Rows)
+        {
+            row.Values.Add("");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this._tables = this.session.User.TablesToList();
+
+        Task.Run(() =>
+        {
+            foreach (var item in this._tables)
+            {
+                item.EnsureListsBalanced();
+            }
+        });
+
+       
+
+    }
+
+    Func<TableExcel, string> converter = p => p?.Name;
+
+    Func<ExcelCellType, string> converterEnum = p => p.ToString();
+}
