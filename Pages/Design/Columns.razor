@@ -5,29 +5,28 @@
 @using BlazorAppExcel.Share.Enums
 @using BlazorAppExcel.Share.Models
 @using System.Linq;
+@using Microsoft.FluentUI.AspNetCore.Components;
 
 @inject ISessionSingletonService session
 @inject IExcelService excel;
 @inject IDialogService DialogService;
 
-@page "/design/columns/{IdTableSelected?}"
+@page "/design/columns/{IdTableSelected?}"   
 
 @if (_tables != null && _tables.Count() > 0)
 {
-    <MudGrid>
-        <MudItem xs="12">
 
-            <MudSelect T="TableExcel" Label="Tables" ToStringFunc="@converter" Variant="Variant.Text" @bind-Value="@TableSelected">
-                @foreach (var item in this._tables)
-                {
-                    <MudSelectItem Value="@item"></MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-      
-    </MudGrid>
+    <FluentSelect TOption="TableExcel"
+                  Label="Select Table"
+                  Items="@this._tables"
+                  Id="table-listbox"
+                  Width="200px"
+                  Height="250px"
+                  OptionValue="@(p => p.Id.ToString())"
+                  OptionText="@(p => p.Name)"
+                  @bind-Value="@IdTableSelected"
+                  @bind-SelectedOption="@TableSelected" />
 }
-
 <table class="table">
     <thead>
         <tr>
@@ -47,16 +46,16 @@
                     var indexItem = index;
                 <tr>
                     <td>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>OnDeleteItem(item, indexItem))"></MudIconButton>
+                        <FluentButton Icon="@MudBlazor.Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>OnDeleteItem(item, indexItem))"></FluentButton>
                     </td>
                         <td>
                             @if (this._editableNameColumn == item.Key)
                             {
-                            <MudTextField T="string" Value="@item.Name" Label="Column Name" ValueChanged="@((value)=>OnSaveChanges(value, item, indexItem))" />
+                            <FluentTextField T="string" Value="@item.Name" Label="Column Name" ValueChanged="@((value)=>OnSaveChanges(value, item, indexItem))" />
                             }
                             else
                             {
-                                <MudText onclick="@(()=>EditNameColumn(item.Key))">@item.Name</MudText>
+                                <FluentLabel onclick="@(()=>EditNameColumn(item.Key))">@item.Name</FluentLabel>
                             }
                         </td>
                         <td>
@@ -73,7 +72,7 @@
                             }
                             else
                             {
-                            <MudText onclick="@(()=>EditTypeColumn(item.Key))">@item.Type.ToString()</MudText>
+                            <FluentTextField onclick="@(()=>EditTypeColumn(item.Key))">@item.Type.ToString()</FluentTextField>
                             }
                     </td>
 
@@ -83,7 +82,7 @@
     </tbody>
 </table>
 
-<MudButton OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</MudButton>
+<MudButton OnClick="@AddItem" Color="@MudBlazor.Color.Success" Class="add-item-btn">Add Item</MudButton>
 
 
 @code {
@@ -110,15 +109,37 @@
 
     private async void OnDeleteItem(ColumnTable item, int index)
     {
-        var parameters = new DialogParameters<SimpleDialog>();
-        parameters.Add(x => x.Title, $"Deleting {item.Name}");
+        // var parameters = new MudBlazor.DialogParameters<SimpleDialog>();
+        // parameters.Add(x => x.Title, $"Deleting {item.Name}");
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        // var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
-        var _result = await _dialog.Result;
-        if (Convert.ToBoolean(_result.Data) == true)
+        // var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
+        // var _result = await _dialog.Result;
+        // if (Convert.ToBoolean(_result.Data) == true)
+        //     DeleteColumn(item, index);
+
+
+        DialogParameters parameters = new()
+            {
+                Title = $"Deleting Column {item.Name}"
+            };
+
+
+        DialogMessageSimple dialogMessage = new()
+            {
+                Title = "Deleting Column",
+                Message = "You're about to eliminate a Column. Do you want to continue?"
+            };
+
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<DialogMessageSimple>(dialogMessage, parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled && result.Data != null)
+        {
             DeleteColumn(item, index);
+        }
     }
 
     private async void DeleteColumn(ColumnTable item, int index)

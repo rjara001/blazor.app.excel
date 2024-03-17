@@ -1,7 +1,8 @@
 ﻿@using System.Text.RegularExpressions
 @using static BlazorAppExcel.Components.CellEdit
 
-<MudTextField T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" />
+@* <MudTextField T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" /> *@
+<FluentTextField @bind-Value=Value AriaLabel="No label"></FluentTextField>
 
 @code {
 

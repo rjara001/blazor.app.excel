@@ -1,11 +1,19 @@
-﻿<MudSelect T="string" Label="@Name" AnchorOrigin="Origin.BottomCenter" @bind-Value="Value">
+﻿@* <MudSelect T="string" Label="@Name" AnchorOrigin="Origin.BottomCenter" @bind-Value="Value">
 
     @foreach (var item in Values)
     {
         <MudSelectItem Value="@item.Key">@item.Value</MudSelectItem>
     }
 
-</MudSelect>
+</MudSelect> *@
+
+<FluentSelect Label="@Name"
+              Items="@Options"
+              Id="people-listbox"
+              Width="200px"
+              Height="250px"
+              OptionValue="@(p => p.Value)"
+              OptionText="@(p => p.Text)"  />
 
 @code {
     [Parameter] public IDictionary<string,string> Values { get; set; }
@@ -33,4 +41,12 @@
     }
 
     [Parameter] public string Name { get; set; }
+
+    private IList<Option<string>> Options
+    {
+        get
+        {
+            return this.Values.Select(_ => new Option<string>() { Value = _.Key, Text = _.Value }).ToList();
+        }
+    }
 }

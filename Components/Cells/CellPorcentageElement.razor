@@ -3,7 +3,9 @@
 @using static BlazorAppExcel.Components.CellEdit
 @* <MudTextField T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" @onkeypress="KeyBoardEventHandler" /> *@
 
-<MudTextField Value="@Value" ValueChanged="@((string txt) => OnValueChanged(txt))" />
+@* <MudTextField Value="@Value" ValueChanged="@((string txt) => OnValueChanged(txt))" /> *@
+
+<FluentTextField Value="@Value" AriaLabel="No label" ValueChanged="@((string txt) => OnValueChanged(txt))"></FluentTextField>
 @code {
 
     private string _value;

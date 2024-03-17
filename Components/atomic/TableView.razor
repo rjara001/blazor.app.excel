@@ -1,5 +1,6 @@
 ﻿@using BlazorAppExcel.Models
 @using BlazorAppExcel.Share.Models
+@* @using MudBlazor *@
 
 @inject IDialogService DialogService
 
@@ -53,7 +54,7 @@
     </tbody>
 </table>
 
-<MudPagination Color="Color.Primary" Count="@rows.Count()" @bind-Selected="@IndexPag" />
+@* <MudPagination Color="MudBlazor.Color.Primary" Count="@rows.Count()" @bind-Selected="@IndexPag" /> *@
 
 @code {
     [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
@@ -83,14 +84,24 @@
 
     private async void Delete(int index)
     {
-        var parameters = new DialogParameters<SimpleDialog>();
-        parameters.Add(x => x.Title, $"Deleting row ({index})");
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        DialogParameters parameters = new()
+            {
+                Title = $"Deleting row {index}"
+            };
 
-        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
-        var _result = await _dialog.Result;
-        if (Convert.ToBoolean(_result.Data) == true)
+
+        DialogMessageSimple dialogMessage = new()
+            {
+                Title = "Deleting Table",
+                Message = "You're about to eliminate a Table. Do you want to continue?"
+            };
+
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<DialogMessageSimple>(dialogMessage, parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled && result.Data != null)
         {
             OnDelete(index);
         }

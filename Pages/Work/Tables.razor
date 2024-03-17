@@ -1,5 +1,6 @@
 ﻿@page "/work/tables/{value}"
 @using BlazorAppExcel.Components
+@using BlazorAppExcel.Components.atomic
 @using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 
@@ -48,49 +49,80 @@
 
     private async void OnSaveColumn(int index, string value)
     {
-        
+
         this.table.Columns[index] = value;
 
         await this.excelService.SetUser(session.User, this.table);
     }
 
-    private void Edit(RowCellExcel row)
+    private async void Edit(RowCellExcel row)
     {
-        var parameters = new DialogParameters<EditDialog>();
-        parameters.Add(x => x.RowExcel, row);
-        parameters.Add(x => x.Save, this.OnSave);
-        parameters.Add(x => x.TableExcel, table);
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        DialogParameters parameters = new()
+            {
+                Title = $"Editing"
+            };
 
-        _dialogTable = DialogService.Show<EditDialog>("Simple Dialog", parameters, options);
+
+        EditDialog dialogMessage = new()
+            {
+                RowExcel = row,
+                Save = ((row) => this.OnSave(row)),
+                TableExcel = table
+            };
+
+
+        IDialogReference _dialogTable = await DialogService.ShowDialogAsync<EditDialog>(dialogMessage, parameters);
     }
 
-    private void AddNew()
+    private async void AddNew()
     {
         IList<string> columns = table.Columns;
 
         RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Types, table.Rows.Count()+1);
 
-        var parameters = new DialogParameters<EditDialog>();
-        parameters.Add(x => x.RowExcel, _newRow);
-        parameters.Add(x => x.Save, this.OnSave);
-        parameters.Add(x => x.TableExcel, table);
+        DialogParameters parameters = new()
+            {
+                Title = $"Editing"
+            };
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        _dialogTable = DialogService.Show<EditDialog>("Simple Dialog", parameters, options);
+        EditDialog dialogMessage = new()
+            {
+                RowExcel = _newRow,
+                Save = ((row)=>this.OnSave(row)),
+                TableExcel = table
+            };
+
+
+        IDialogReference _dialogTable = await DialogService.ShowDialogAsync<EditDialog>(dialogMessage, parameters);
 
     }
 
-    private void Settings()
+    private async Task Settings()
     {
-        var parameters = new DialogParameters<SettingsDialog>();
-        parameters.Add(x => x.Columns, this.table.Columns);
-        parameters.Add(x => x.Types, this.table.Types);
-        parameters.Add(x => x.Save, this.OnSaveType);
+        // var parameters = new DialogParameters<SettingsDialog>();
+        // parameters.Add(x => x.Columns, this.table.Columns);
+        // parameters.Add(x => x.Types, this.table.Types);
+        // parameters.Add(x => x.Save, this.OnSaveType);
 
-        _dialogSettings = DialogService.Show<SettingsDialog>("Simple Dialog", parameters);
+        // _dialogSettings = DialogService.Show<SettingsDialog>("Simple Dialog", parameters);
+
+        DialogParameters parameters = new()
+            {
+                Title = $"Editing"
+            };
+
+
+        SettingsDialog dialogMessage = new()
+            {
+                Columns = this.table.Columns,
+                Save = ((row) => this.OnSaveType(row)),
+                Types = this.table.Types
+            };
+
+
+        IDialogReference _dialogSettings = await DialogService.ShowDialogAsync<SettingsDialog>(dialogMessage, parameters);
     }
 
     protected override void OnParametersSet()
@@ -105,7 +137,7 @@
 
         await this.excelService.SetUser(session.User, table);
 
-        _dialogSettings.Close();
+        _dialogSettings.CloseAsync();
 
     }
 
@@ -128,7 +160,7 @@
 
         await this.excelService.SetUser(session.User, table);
 
-        _dialogTable.Close();
+        _dialogTable.CloseAsync();
 
         this.StateHasChanged();
     }

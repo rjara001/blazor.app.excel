@@ -1,32 +1,30 @@
-﻿
-@using BlazorAppExcel.Models;
-@using BlazorAppExcel.Share.Enums
-@using BlazorAppExcel.Share.Models
-@inject ISnackbar Snackbar
-@using BlazorAppExcel.Components.Cells
+﻿@using BlazorAppExcel.Share.Enums
+@implements IDialogContentComponent<DialogMessageSimple>
 
-<MudDialog>
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+<FluentDialogHeader ShowDismiss="true">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentIcon Value="@(new Icons.Regular.Size24.WindowApps())" />
+        <FluentLabel Typo="Typography.PaneHeader">
             Settings Item
-        </MudText>
-    </TitleContent>
-    <DialogContent>
+        </FluentLabel>
+    </FluentStack>
+</FluentDialogHeader>
 
-        @foreach (var (item, index) in Columns.Select((item, index) => (item, index)))
-        {
-            var typeSelected = ExcelCellTypeUtil.GetTypeFromValue(this.Types[index]).ToString();
+@* Footer *@
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveItem">Save</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="@Cancel">Cancel</FluentButton>
+</FluentDialogFooter>
 
-            <CellSelectElement Index="@index" Name="@item" Value="@typeSelected" Values="@Items" OnChildParameterChanged="UpdateChildParameter"></CellSelectElement>
-        }
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="SaveItem">Save</MudButton>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
+@* Body *@
+<FluentDialogBody>
+    @foreach (var (item, index) in Columns.Select((item, index) => (item, index)))
+    {
+        var typeSelected = ExcelCellTypeUtil.GetTypeFromValue(this.Types[index]).ToString();
 
-    </DialogActions>
-</MudDialog>
+        <CellSelectElement Index="@index" Name="@item" Value="@typeSelected" Values="@Items" OnChildParameterChanged="UpdateChildParameter"></CellSelectElement>
+    }
+</FluentDialogBody>
 
 @code {
     IDictionary<string,string> Items = ExcelCellTypeUtil.GetEnumDictionary();
@@ -34,8 +32,11 @@
     [Parameter] public IList<string> Columns { get; set; }
     [Parameter] public IList<int> Types { get; set; }
     [Parameter] public Action<IList<int>> Save { get; set; }
+    [Parameter]
+    public DialogMessageSimple Content { get; set; } = default!;
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -53,12 +54,12 @@
         // this.StateHasChanged();
     }
 
-    void Cancel() => MudDialog.Cancel();
+    async Task Cancel() => await Dialog.CancelAsync();
 
-    private void SaveItem()
+    private async Task SaveItem()
     {
         Save(Types);
-
+        await Dialog.CancelAsync();
     }
 
 }

@@ -1,11 +1,17 @@
-﻿@* <MudSwitch @bind-Value="ValueString" Label="@Name"/> *@
-
+﻿
+@* <MudSwitch @bind-Value="ValueString" Label="@Name"/> *@
+@* 
 <MudField Label="@Name" Variant="Variant.Text" InnerPadding="false">
     <MudRadioGroup T="string" @bind-Value="Value">
         <MudRadio Value="@("true")" T="string">Yes</MudRadio>
         <MudRadio Value="@("false")" T="string">No</MudRadio>
     </MudRadioGroup>
-</MudField>
+</MudField> *@
+
+<FluentRadioGroup Name="@Name" @bind-Value=Value Label="@Name">
+    <FluentRadio Value="@("true")">Yes</FluentRadio>
+    <FluentRadio Value="@("false")">No</FluentRadio>
+    </FluentRadioGroup>
 
 @code {
     private string _value;

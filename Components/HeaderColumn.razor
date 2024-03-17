@@ -1,12 +1,12 @@
 ﻿@if (!IsTitleEditable)
 {
-    <MudText onclick="@EnableEditTitle">
+    <FluentLabel onclick="@EnableEditTitle">
         @Value
-    </MudText>
+    </FluentLabel>
 }
 else
 {
-    <MudTextField ShrinkLabel @bind-Value="@Value" Variant="Variant.Text" OnBlur="DisableEditTitle"></MudTextField>
+    <FluentTextField ShrinkLabel @bind-Value="@Value" Variant="Variant.Text" OnBlur="DisableEditTitle"></FluentTextField>
 }
 
 @code {

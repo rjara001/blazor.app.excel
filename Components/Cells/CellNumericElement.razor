@@ -1,7 +1,7 @@
 ﻿@using BlazorAppExcel.Share.Enums
 
-<MudNumericField @bind-Value="ValueInt64" Label="@Name" />
-
+@* <MudNumericField @bind-Value="ValueInt64" Label="@Name" /> *@
+<FluentNumberField @bind-Value="@ValueInt64">@Name</FluentNumberField>
 @code {
     private Int64 _value;
 

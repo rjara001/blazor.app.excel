@@ -8,7 +8,7 @@
 @inject IJSRuntime JSRuntime
 @inject IExcelService excelService
 @inject ILocalStorageService localStore
-@inject MudBlazor.IDialogService DialogService
+@inject IDialogService DialogService
 @inject ISessionSingletonService userServices;
 
 <style>
@@ -22,9 +22,9 @@
 
 @if (@ds.Count()>0)
 {
-    <MudButton OnClick="@save" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Small">Save</MudButton>
+    <FluentButton OnClick="@save" Variant="Variant.Filled" StartIcon="@(new Icons.Regular.Size20.Save())" Color="Color.Info" Size="Size.Small">Save</FluentButton>
 
-    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+    <FluentTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
   
         @for (var index = 0; index < ds.Count; index++)
         {
@@ -33,13 +33,13 @@
             var dsTable = ds[index];
             this.table = dsTable;
 
-            <MudTabPanel Text="@tabNameDisplay">
+            <FluentTab Text="@tabNameDisplay">
                 <ChildContent>
                     <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
                 </ChildContent>
-            </MudTabPanel>
+            </FluentTab>
         }
-    </MudTabs>
+    </FluentTabs>
 }
 
 
@@ -85,11 +85,32 @@
 
         this.userServices.User.AddTable(table);
   
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        // var options = new DialogOptions { CloseOnEscapeKey = true };
 
-        var parameters = new MudBlazor.DialogParameters<SimpleDialog>();
-        parameters.Add(x => x.Title, "Save Succesfully");
+        // var parameters = new MudBlazor.DialogParameters<SimpleDialog>();
+        // parameters.Add(x => x.Title, "Save Succesfully");
 
-        DialogService.Show<SimpleDialog>("Save Succesfully", options);
+
+        // DialogService.Show<SimpleDialog>("Save Succesfully", options);
+
+
+        // -------
+
+        DialogParameters parameters = new()
+            {
+                Title = "Save Succesfully"
+            };
+
+
+        DialogMessageSimple dialogMessage = new()
+            {
+                Title = "Saving Table",
+                Message = "Save Succesfully"
+            };
+
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<DialogMessageSimple>(dialogMessage, parameters);
+     
+      
     }
 }

@@ -14,14 +14,17 @@
         <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
     </div>
 }
+<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center">
+    @foreach (TableExcel table in tables)
+    {
+        <div style="padding-top:20px">
 
-@foreach (TableExcel table in tables)
-{
-    <div style="padding-top:20px">
+            <Card Table="@table" OnDelete="OnDelete"></Card>
+        </div>
+    }
+</FluentStack>
 
-        <Card Table="@table" OnDelete="OnDelete"></Card>
-    </div>
-}
+
 
 @code {
 

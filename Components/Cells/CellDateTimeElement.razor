@@ -1,4 +1,6 @@
-﻿<MudDatePicker T="string" @bind-Date="ValueDateTime" Label="@Name" />
+﻿@* <MudDatePicker T="string" @bind-Date="ValueDateTime" Label="@Name" /> *@
+
+<FluentDatePicker @bind-Value="ValueDateTime" />
 
 @code {
     private DateTime _value;

@@ -6,18 +6,16 @@
 @inject ISessionSingletonService userServices;
 @inject NavigationManager NavigationManager;
 
-<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavGroup Title="Design" Expanded="true">
-        <MudNavLink Href="/design/upload">Upload</MudNavLink>
-        <MudNavLink Href="/design/tables">Tables</MudNavLink>
-        <MudNavLink Href="/design/columns">Columns</MudNavLink>
-    </MudNavGroup>
-    <MudNavGroup Title="Work Area" Expanded="true">
-        <MudNavLink Href="/work/tables">Tables</MudNavLink>
-    </MudNavGroup>
-    <MudNavLink Href="/about"  Match="NavLinkMatch.Prefix">About</MudNavLink>
-</MudNavMenu>
+<FluentNavMenu Width="250">
+    <FluentNavLink Icon="@(new Icons.Regular.Size24.Home())">Dashboard</FluentNavLink>
+
+    <FluentNavGroup Title="Design">
+        <FluentNavLink Href="/design/upload" Icon="@(new Icons.Regular.Size24.LeafOne())">Upload</FluentNavLink>
+        <FluentNavLink Href="/design/tables" Icon="@(new Icons.Regular.Size24.LeafOne())">Tables</FluentNavLink>
+        <FluentNavLink Href="/design/columns" Icon="@(new Icons.Regular.Size24.LeafOne())">Columns</FluentNavLink>
+            </FluentNavGroup>
+            <FluentNavLink Icon="@(new Icons.Regular.Size24.CalendarAgenda())" Disabled="true">About</FluentNavLink>
+        </FluentNavMenu>
 
 @code {
     private bool collapseNavMenu = true;

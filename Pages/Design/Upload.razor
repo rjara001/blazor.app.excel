@@ -11,16 +11,48 @@
 <h3>Import Excel</h3>
 @if (loading)
 {
-    <MudProgressCircular Color="Color.Default" Indeterminate="true" b/>
+    @* <MudProgressCircular Color="Color.Default" Indeterminate="true" b/> *@
+    <div style="width: 300px;display: grid; grid-gap: 12px; grid-auto-flow: column;">
+        <FluentProgressRing Min="0" Max="100" Value="75"></FluentProgressRing>
+    </div>
 }
 
 @if (ds.Count()==0)
 {
-    <FileUpload OnChange="(e)=> ImportFileExcel(e)"></FileUpload>
+    @* <FileUpload OnChange="(e)=> ImportFileExcel(e)"></FileUpload> *@
+
+    <FluentInputFile Id="my-file-uploader"
+                     Mode="InputFileMode.SaveToTemporaryFolder"
+                     Multiple="true"
+                     MaximumFileCount="4"
+                     MaximumFileSize="@(10*1024*1024)"
+                     Accept="image/*"
+                     OnCompleted="@OnCompletedAsync"
+                     Style="height: 300px; border: 1px dashed var(--accent-fill-rest);">
+        <ChildContent>
+            <label for="my-file-uploader">
+                <FluentIcon Value="@(new @Icons.Regular.Size24.ArrowUpload())" />
+            </label>
+
+            <div>
+                Drag files here you wish to upload,
+                or <label for="my-file-uploader">browse</label>
+                for them<span style="color: red;">*</span>.
+                <br />
+                <em>Maximum of 4 files allowed.</em>
+            </div>
+
+            <div>
+                <br />
+                <a href="#">Read more about our supported file formats.</a>
+            </div>
+        </ChildContent>
+    </FluentInputFile>
 }
 else
 {
-    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="@clean"></MudIconButton>
+    @* <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="@clean"></MudIconButton> *@
+    <FluentButton IconEnd="@(new Icons.Regular.Size16.Globe())" OnClick="@clean" Appearance="Appearance.Accent">Accent</FluentButton>
 }
 <TabExcel ds=@ds></TabExcel>
 
@@ -42,5 +74,16 @@ else
         loading = false;
 
         this.StateHasChanged();
+    }
+
+    private async Task OnCompletedAsync(IEnumerable<FluentInputFileEventArgs> files)
+    {
+        var Files = files.ToArray();
+
+        // For the demo, delete these files.
+        foreach (IBrowserFile file in Files)
+        {
+            await Util.ProcessFile(file);
+        }
     }
 }

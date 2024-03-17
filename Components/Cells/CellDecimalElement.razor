@@ -1,7 +1,7 @@
 ﻿@using BlazorAppExcel.Share.Enums
 
-<MudNumericField @bind-Value="ValueDecimal" Label="@Name" />
-
+@* <MudNumericField @bind-Value="ValueDecimal" Label="@Name" /> *@
+<FluentNumberField @bind-Value="@ValueDecimal">@Name</FluentNumberField>
 @code {
     private Decimal _value;
 

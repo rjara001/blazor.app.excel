@@ -2,39 +2,27 @@
 @using BlazorAppExcel.Models
 @inject NavigationManager NavigationManager;
 @inject ISessionSingletonService user;
-@inject IDialogService DialogService;
 @inject IExcelService excelService;
+@inject IDialogService DialogService;
 
-<MudCard>
-    <MudCardHeader>
-        <CardHeaderContent>
-
-            @if (!IsTitleEditable)
+<FluentCard Width="400px" Height="200px">
+      @if (!IsTitleEditable)
             {
-                <MudText Typo="Typo.h6" onclick="@EnableEditTitle">
-                    @Table.Name
-                </MudText>
+        <FluentLabel Typo="Typography.H6" onclick="@EnableEditTitle">
+            @Table.Name
+        </FluentLabel>
             }
             else
             {
-                <MudTextField ShrinkLabel @bind-Value="Table.Name" Label="Tab Name" Variant="Variant.Text" OnBlur="DisableEditTitle"></MudTextField>
+        <FluentTextField @bind-Value=Table.Name AriaLabel="No label" Label="Tab Name" OnBlur="DisableEditTitle"></FluentTextField>
             }
-        </CardHeaderContent>
-        <CardHeaderActions>
-           
-            <MudMenu Icon="@Icons.Material.Filled.Settings" Color="Color.Primary">
-                    <MudMenuItem OnClick="()=> Go()">Edit</MudMenuItem>
-                    <MudMenuItem OnClick="() => Delete()">Delete</MudMenuItem>
-            </MudMenu>
-        </CardHeaderActions>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudText Typo="Typo.body2">@getFileNameValue()</MudText>
-    </MudCardContent>
-    <MudCardActions>
-            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => Go()">@getDateCreationValue()</MudButton>
-    </MudCardActions>
-</MudCard>
+
+    <FluentFooter>
+        <FluentAnchor Href="@($"work/tables/{Table.Name}")" Appearance="Appearance.Hypertext">@Table.DateCreation</FluentAnchor>
+    </FluentFooter>
+            
+</FluentCard>
+
 
 @code {
 
@@ -57,15 +45,31 @@
 
     private async void Delete()
     {
-        var parameters = new DialogParameters<SimpleDialog>();
-        parameters.Add(x => x.Title, $"Deleting {Table.Name}");
+        DialogMessageSimple dialogMessage = new()
+            {
+                Title = "Deleting Table",
+                Message = "You're about to eliminate a Table. Do you want to continue?"
+            };
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        DialogParameters parameters = new()
+            {
+                Title = $"Deleting {Table.Name}"
+            };
 
-        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
-        var _result = await _dialog.Result;
-        if (Convert.ToBoolean(_result.Data) == true)
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<DialogMessageSimple>(parameters);
+   
+        var result = await dialog.Result;
+
+        if (!result.Cancelled && result.Data != null)
+        {
             OnDelete(Table);
+        }
+
+        // var _dialog = await DialogService.ShowAsync<DialogMessage>("Simple Dialog", parameters, options);
+        // var _result = await _dialog.Result;
+        // if (Convert.ToBoolean(_result.Data) == true)
+        //     OnDelete(Table);
     }
 
     public void Go()

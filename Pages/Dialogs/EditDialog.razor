@@ -1,27 +1,27 @@
-﻿
-@using BlazorAppExcel.Models;
-@using BlazorAppExcel.Share.Models
+﻿@implements IDialogContentComponent<DialogMessageSimple>
 
-<MudDialog>
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
-            Edit Item
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        @foreach (var item in RowExcel.Cells)
-        {
-            <CellEdit Item="@item" UniqueValues="@UniqueValues(item.Name)"></CellEdit>
-        }
+<FluentDialogHeader ShowDismiss="true">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentIcon Value="@(new Icons.Regular.Size24.WindowApps())" />
+        <FluentLabel Typo="Typography.PaneHeader">
+            @Content.Title
+        </FluentLabel>
+    </FluentStack>
+</FluentDialogHeader>
 
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="SaveItem">Save</MudButton>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
+<FluentDialogBody>
 
-    </DialogActions>
-</MudDialog>
+    @foreach (var item in RowExcel.Cells)
+    {
+        <CellEdit Item="@item" UniqueValues="@UniqueValues(item.Name)"></CellEdit>
+    }
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveItem">Save</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="@Cancel">Cancel</FluentButton>
+</FluentDialogFooter>
+
 
 @code {
     [Parameter] public RowCellExcel RowExcel { get; set; }
@@ -29,9 +29,13 @@
 
     [Parameter] public TableExcel TableExcel { get; set; }
 
-    public IDictionary<string, string> Values = new Dictionary<string, string>();
+    [Parameter]
+    public DialogMessageSimple Content { get; set; } = default!;
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    public IDictionary<string, string> Values = new Dictionary<string, string>();
 
     protected override void OnInitialized()
     {
@@ -49,13 +53,15 @@
         return new List<string>();
     }
 
-    private void Cancel()
+    private async Task Cancel()
     {
-        MudDialog.Cancel();
+        await Dialog.CloseAsync();
     }
 
-    private void SaveItem()
+    private async Task SaveItem()
     {
         this.Save(RowExcel);
+        await Dialog.CloseAsync();
     }
+
 }

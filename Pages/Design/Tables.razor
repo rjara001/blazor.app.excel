@@ -7,29 +7,25 @@
 
 @page "/design/tables"
 
-<MudDataGrid Items="@TableList">
-    <Columns>
-        <TemplateColumn CellClass="d-flex justify-end">
-            <CellTemplate>
-                <MudStack Row>
-                   
-                    <MudButton Size="@Size.Small" Variant="@Variant.Filled" Color="@Color.Primary" OnClick="@(()=>ItemSelection(@context.Item))">@context.Item.Name</MudButton>
-                </MudStack>
-            </CellTemplate>
+<FluentDataGrid Items="@TableList">
+   
+        <TemplateColumn>
+            <FluentButton OnClick="@(()=>ItemSelection(@context))">@context.Name</FluentButton>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.Name" Title="Name" />
-        <PropertyColumn Property="x => x.FileName" Title="File Name" />
-        <PropertyColumn Property="x => x.DateCreation" Title="Date Creation"  />
-        <PropertyColumn Property="x => x.Columns.Count" Title="Columns" />
-        <PropertyColumn Property="x => x.Rows.Count" Title="Rows" />
-    </Columns>
-</MudDataGrid>
-    @code {
-    private IEnumerable<Models.TableExcel> TableList = new List<Models.TableExcel>();
+        <PropertyColumn Property="@(x => x.Name)" Title="Name" />
+        <PropertyColumn Property="@(x => x.FileName)" Title="File Name" />
+        <PropertyColumn Property="@(x => x.DateCreation)" Title="Date Creation" />
+        <PropertyColumn Property="@(x => x.Columns.Count)" Title="Columns" />
+        <PropertyColumn Property="@(x => x.Rows.Count)" Title="Rows" />
+
+</FluentDataGrid>
+
+ @code {
+    private IQueryable<Models.TableExcel> TableList = null;
 
     protected override async Task OnInitializedAsync()
     {
-        TableList = this.session.User.TablesToList();
+        TableList = this.session.User.TablesToList().AsQueryable();
     }
 
     protected void ItemSelection(TableExcel table)

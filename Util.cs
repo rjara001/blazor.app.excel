@@ -76,11 +76,18 @@ public class Util
 
     private static async Task<IList<ISheet>> getDataSetFromStreamAsync(InputFileChangeEventArgs e)
     {
-        string sFileExtension = Path.GetExtension(e.File.Name).ToLower();
+       
 
+       
+        return await ProcessFile(e.File);
+    }
+
+    public static async Task<IList<ISheet>> ProcessFile(IBrowserFile file)
+    {
+        string sFileExtension = Path.GetExtension(file.Name).ToLower();
         IList<ISheet> sheets = new List<ISheet>();
 
-        using (var fileStream = e.File.OpenReadStream())
+        using (var fileStream = file.OpenReadStream())
             using (MemoryStream ms = new MemoryStream())
             {
                 await fileStream.CopyToAsync(ms);

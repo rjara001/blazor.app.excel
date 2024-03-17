@@ -1,20 +1,33 @@
-﻿@using MudBlazor
+﻿@implements IDialogContentComponent<DialogMessageSimple>
 
-<MudDialog>
-    <DialogContent>
-        @Title
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
-    </DialogActions>
-</MudDialog>
+<FluentDialogHeader ShowDismiss="true">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentIcon Value="@(new Icons.Regular.Size24.WindowApps())" />
+        <FluentLabel Typo="Typography.PaneHeader">
+            @Content.Title
+        </FluentLabel>
+    </FluentStack>
+</FluentDialogHeader>
+
+@* Footer *@
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@Submit">Save</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="@Cancel">Cancel</FluentButton>
+</FluentDialogFooter>
+
+<FluentDialogBody>
+    <FluentLabel>@Content.Message</FluentLabel>
+    
+</FluentDialogBody>
+
 @code {
+
     [Parameter]
-    public string Title { get; set; }
+    public DialogMessageSimple Content { get; set; } = default!;
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
-    void Cancel() => MudDialog.Cancel();
+    async Task Submit() => Dialog.CloseAsync(Content);
+    async Task Cancel() => Dialog.CloseAsync();
 }

@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
+@* <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -18,13 +18,30 @@
             @Body
         </MudContainer>
     </MudMainContent>
-</MudLayout>
+</MudLayout> *@
+
+<FluentLayout Style="margin-top: 10px;">
+
+        <FluentHeader>
+            TabPower
+            <FluentSpacer />
+            
+        </FluentHeader>
+    
+    
+    <FluentStack Orientation="Orientation.Horizontal" Width="100%">
+        <NavMenu />
+        
+
+        @Body
+    </FluentStack>
+
+    <FluentFooter>
+        Footer text
+    </FluentFooter>
+   
+</FluentLayout>
 
 @code {
-    bool _drawerOpen = true;
-
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
+    
 }

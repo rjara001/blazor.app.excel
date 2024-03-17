@@ -1,5 +1,8 @@
 ﻿@using static BlazorAppExcel.Components.CellEdit
-<MudTextField T="string" @bind-Value="Value" Label="@Name" /> 
+@* <MudTextField T="string" @bind-Value="Value" Label="@Name" /> 
+ *@
+<FluentTextField @bind-Value=Value AriaLabel="No label" Label="@Name"></FluentTextField>
+
 @code {
 
     private string _value;

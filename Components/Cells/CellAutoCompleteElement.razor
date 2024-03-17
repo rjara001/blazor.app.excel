@@ -1,31 +1,42 @@
 ﻿@using System.Globalization
+@using Microsoft.FluentUI.AspNetCore.Components
 @using static BlazorAppExcel.Components.CellEdit
 
-<MudAutocomplete T="string" Label="@Name" @bind-Value="Value" SearchFunc="@Search"
+@* <MudAutocomplete T="string" Label="@Name" @bind-Value="Value" SearchFunc="@Search"
                  CoerceValue="true"
-                 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+                 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" /> *@
+
+                 <FluentAutocomplete TOption="string"
+                    AutoComplete="off"
+                    Autofocus="true"
+                    Label="@Name"
+                    Width="250px"
+                    Placeholder="@Name"
+                    OnOptionsSearch="@OnSearchAsync"
+                    @bind-SelectedOptions="@SelectedItems"
+             
+                    MaximumSelectedOptions="1" />
 @code {
 
-    private string _value;
+    private IEnumerable<string> _selectedItems = Array.Empty<string>();
+    IEnumerable<string> SelectedItems { get
+        {
+            return this._selectedItems;
+        } set
+        {
+            if (_selectedItems == value) return;
+            this._selectedItems = value;
+            if (_selectedItems.Count()>0)
+                OnChildParameterChanged.InvokeAsync(_selectedItems.FirstOrDefault());
+
+        } }
+
 
     [Parameter]
     public EventCallback<string> OnChildParameterChanged { get; set; }
 
     [Parameter]
-    public string Value
-    {
-        get
-        {
-            return this._value;
-        }
-        set
-        {
-            if (_value == value) return;
-            this._value = value;
-            OnChildParameterChanged.InvokeAsync(value);
-
-        }
-    }
+    public string Value { get; set; }
 
     [Parameter] public string Name { get; set; }
 
@@ -33,39 +44,45 @@
 
     private string _autocompleteText;
 
-    private void OnComboValueChanged(string value)
+    private async Task OnSearchAsync(OptionsSearchEventArgs<string> e)
     {
-        string porcentageValue = Util.ExtractNumberFromString(value, Share.Enums.ExcelCellType.Porcentage);
-
-
-        try
-        {
-            double doubleValue = 0;
-            doubleValue = Convert.ToDouble(porcentageValue) / 100;
-            Value = String.Format("{0:P2}", doubleValue.ToString("P02", CultureInfo.CurrentCulture));
-        }
-        catch { }
-
+ 
+        e.Items = Values;
     }
 
-    private void HandleTextChange(string newText)
-    {
-        _autocompleteText = newText;
-    }
+    // private void OnComboValueChanged(string value)
+    // {
+    //     string porcentageValue = Util.ExtractNumberFromString(value, Share.Enums.ExcelCellType.Porcentage);
 
-    public void HandleBlur(FocusEventArgs args)
-    {
-        if (!Values.Contains(_autocompleteText))
-        {
-            Values.Add(_autocompleteText);
-        }
-    }
 
-    private async Task<IEnumerable<string>> Search(string value)
-    {
-        // if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
-            return new string[0];
-        return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
+    //     try
+    //     {
+    //         double doubleValue = 0;
+    //         doubleValue = Convert.ToDouble(porcentageValue) / 100;
+    //         Value = String.Format("{0:P2}", doubleValue.ToString("P02", CultureInfo.CurrentCulture));
+    //     }
+    //     catch { }
+
+    // }
+
+    // private void HandleTextChange(string newText)
+    // {
+    //     _autocompleteText = newText;
+    // }
+
+    // public void HandleBlur(FocusEventArgs args)
+    // {
+    //     if (!Values.Contains(_autocompleteText))
+    //     {
+    //         Values.Add(_autocompleteText);
+    //     }
+    // }
+
+    // private async Task<IEnumerable<string>> Search(string value)
+    // {
+    //     // if text is null or empty, don't return values (drop-down will not open)
+    //     if (string.IsNullOrEmpty(value))
+    //         return new string[0];
+    //     return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    // }
 }

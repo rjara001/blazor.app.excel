@@ -5,6 +5,7 @@ using BlazorAppExcel.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.FluentUI.AspNetCore.Components;
 using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -22,6 +23,7 @@ builder.Services.AddHttpClient("MyNamedClient", client =>
     // You can configure other properties of HttpClient here if needed
 });
 
+builder.Services.AddFluentUIComponents();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddTransient<IExcelService, ExcelService>();
 builder.Services.AddSingleton<ISessionSingletonService, SessionSingletonService>();
