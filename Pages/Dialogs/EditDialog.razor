@@ -2,12 +2,12 @@
 @using BlazorAppExcel.Models;
 @using BlazorAppExcel.Share.Models
 
-<MudDialog>
+<Dialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+        <Text Typo="Typo.h6">
+            <Icon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
             Edit Item
-        </MudText>
+        </Text>
     </TitleContent>
     <DialogContent>
         @foreach (var item in RowExcel.Cells)
@@ -17,11 +17,11 @@
 
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="SaveItem">Save</MudButton>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <Button OnClick="SaveItem">Save</Button>
+        <Button OnClick="Cancel">Cancel</Button>
 
     </DialogActions>
-</MudDialog>
+</Dialog>
 
 @code {
     [Parameter] public RowCellExcel RowExcel { get; set; }

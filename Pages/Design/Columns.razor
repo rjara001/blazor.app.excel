@@ -14,18 +14,18 @@
 
 @if (_tables != null && _tables.Count() > 0)
 {
-    <MudGrid>
-        <MudItem xs="12">
+    <Grid>
+        <Item xs="12">
 
-            <MudSelect T="TableExcel" Label="Tables" ToStringFunc="@converter" Variant="Variant.Text" @bind-Value="@TableSelected">
+            <Select T="TableExcel" Label="Tables" ToStringFunc="@converter" Variant="Variant.Text" @bind-Value="@TableSelected">
                 @foreach (var item in this._tables)
                 {
-                    <MudSelectItem Value="@item"></MudSelectItem>
+                    <SelectItem Value="@item"></SelectItem>
                 }
-            </MudSelect>
-        </MudItem>
+            </Select>
+        </Item>
       
-    </MudGrid>
+    </Grid>
 }
 
 <table class="table">
@@ -47,33 +47,33 @@
                     var indexItem = index;
                 <tr>
                     <td>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>OnDeleteItem(item, indexItem))"></MudIconButton>
+                        <IconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>OnDeleteItem(item, indexItem))"></IconButton>
                     </td>
                         <td>
                             @if (this._editableNameColumn == item.Key)
                             {
-                            <MudTextField T="string" Value="@item.Name" Label="Column Name" ValueChanged="@((value)=>OnSaveChanges(value, item, indexItem))" />
+                            <InputText T="string" Value="@item.Name" Label="Column Name" ValueChanged="@((value)=>OnSaveChanges(value, item, indexItem))" />
                             }
                             else
                             {
-                                <MudText onclick="@(()=>EditNameColumn(item.Key))">@item.Name</MudText>
+                                <Text onclick="@(()=>EditNameColumn(item.Key))">@item.Name</Text>
                             }
                         </td>
                         <td>
                             @if (this._editableTypeColumn == item.Key)
                             {
                             <CellSelectElement Index="@index" Value="@item.Type.ToString()" Values="@GetTypes()" OnChildParameterChanged="@((KeyValuePair<int, string> e)=>UpdateType(e, item))"></CellSelectElement>
-             @*                <MudSelect T="ExcelCellType" Label="Tables" ToStringFunc="@converterEnum" Variant="Variant.Text" ValueChanged="@((value)=>OnSaveTypeChanges(value, indexItem))">
+             @*                <Select T="ExcelCellType" Label="Tables" ToStringFunc="@converterEnum" Variant="Variant.Text" ValueChanged="@((value)=>OnSaveTypeChanges(value, indexItem))">
                                 @foreach (var item in GetTypes())
                                     {
-                                        <MudSelectItem Value="@item"></MudSelectItem>
+                                        <SelectItem Value="@item"></SelectItem>
                                     }
-                                </MudSelect>
+                                </Select>
  *@
                             }
                             else
                             {
-                            <MudText onclick="@(()=>EditTypeColumn(item.Key))">@item.Type.ToString()</MudText>
+                            <Text onclick="@(()=>EditTypeColumn(item.Key))">@item.Type.ToString()</Text>
                             }
                     </td>
 
@@ -83,7 +83,7 @@
     </tbody>
 </table>
 
-<MudButton OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</MudButton>
+<Button OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</Button>
 
 
 @code {

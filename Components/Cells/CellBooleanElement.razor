@@ -1,9 +1,9 @@
-﻿@* <MudSwitch @bind-Value="ValueString" Label="@Name"/> *@
+﻿@* <Switch @bind-Value="ValueString" Label="@Name"/> *@
 
-<MudField Label="@Name" Variant="Variant.Text" InnerPadding="false">
-    <MudRadioGroup T="string" @bind-Value="Value">
-        <MudRadio Value="@("true")" T="string">Yes</MudRadio>
-        <MudRadio Value="@("false")" T="string">No</MudRadio>
+<Field Label="@Name" Variant="Variant.Text" InnerPadding="false">
+    <RadioGroup T="string" @bind-Value="Value">
+        <Radio Value="@("true")" T="string">Yes</MudRadio>
+        <Radio Value="@("false")" T="string">No</MudRadio>
     </MudRadioGroup>
 </MudField>
 

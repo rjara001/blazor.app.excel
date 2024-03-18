@@ -6,18 +6,18 @@
 @inject ISessionSingletonService userServices;
 @inject NavigationManager NavigationManager;
 
-<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavGroup Title="Design" Expanded="true">
-        <MudNavLink Href="/design/upload">Upload</MudNavLink>
-        <MudNavLink Href="/design/tables">Tables</MudNavLink>
-        <MudNavLink Href="/design/columns">Columns</MudNavLink>
-    </MudNavGroup>
-    <MudNavGroup Title="Work Area" Expanded="true">
-        <MudNavLink Href="/work/tables">Tables</MudNavLink>
-    </MudNavGroup>
-    <MudNavLink Href="/about"  Match="NavLinkMatch.Prefix">About</MudNavLink>
-</MudNavMenu>
+<NavMenu>
+    <NavLink Href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
+    <NavGroup Title="Design" Expanded="true">
+        <NavLink Href="/design/upload">Upload</NavLink>
+        <NavLink Href="/design/tables">Tables</NavLink>
+        <NavLink Href="/design/columns">Columns</NavLink>
+    </NavGroup>
+    <NavGroup Title="Work Area" Expanded="true">
+        <NavLink Href="/work/tables">Tables</NavLink>
+    </NavGroup>
+    <NavLink Href="/about"  Match="NavLinkMatch.Prefix">About</NavLink>
+</NavMenu>
 
 @code {
     private bool collapseNavMenu = true;

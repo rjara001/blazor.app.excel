@@ -1,11 +1,22 @@
-﻿<MudSelect T="string" Label="@Name" AnchorOrigin="Origin.BottomCenter" @bind-Value="Value">
+﻿@* <Select T="string" Label="@Name" AnchorOrigin="Origin.BottomCenter" @bind-Value="Value">
 
     @foreach (var item in Values)
     {
-        <MudSelectItem Value="@item.Key">@item.Value</MudSelectItem>
+        <SelectItem Value="@item.Key">@item.Value</SelectItem>
     }
 
-</MudSelect>
+</Select>
+ *@
+<Dropdown>
+    <DropdownToggleButton Color="ButtonColor.Secondary">@Name</DropdownToggleButton>
+    <DropdownMenu>
+            @foreach (var item in Values)
+    {
+        <DropdownItem To="#" Type="ButtonType.Link">@item.Value</DropdownItem>
+    }
+         
+    </DropdownMenu>
+</Dropdown>
 
 @code {
     [Parameter] public IDictionary<string,string> Values { get; set; }

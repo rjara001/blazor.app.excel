@@ -1,0 +1,109 @@
+﻿@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+@inject NavigationManager NavigationManager;
+@inject ISessionSingletonService user;
+@* @inject IDialogService DialogService; *@
+@inject IExcelService excelService;
+
+<Card>
+    <CardHeader>
+                   @if (!IsTitleEditable)
+            {
+                <div onclick="@EnableEditTitle">
+                    @Table.Name
+                </div>
+            }
+            else
+            {
+                <InputText  @bind-Value="Table.Name" Label="Tab Name" Variant="Variant.Text" OnBlur="DisableEditTitle"></InputText>
+            }
+       @* 
+        <CardHeaderActions>
+           
+            <Menu Icon="@Icons.Material.Filled.Settings" Color="Color.Primary">
+                    <MenuItem OnClick="()=> Go()">Edit</MenuItem>
+                    <MenuItem OnClick="() => Delete()">Delete</MenuItem>
+            </Menu>
+        </CardHeaderActions> *@
+    </CardHeader>
+    <CardBody>
+        <div Typo="Typo.body2">@getFileNameValue()</div>
+    </CardBody>
+@*     <CardActions>
+            <Button Variant="Variant.Text" Color="Color.Primary" OnClick="() => Go()">@getDateCreationValue()</Button>
+    </CardActions> *@
+</Card>
+
+@code {
+
+    [Parameter] public TableExcel Table { get; set; }
+    [Parameter] public Action<TableExcel> OnDelete { get; set; }
+    bool IsTitleEditable = false;
+
+    private ConfirmDialog dialog;
+
+    private async void DisableEditTitle()
+    {
+
+        IsTitleEditable = false;
+
+        await this.excelService.SetUser(user.User, Table);
+    }
+
+    private void EnableEditTitle()
+    {
+        IsTitleEditable = !IsTitleEditable;
+    }
+
+    private async void Delete()
+    {
+        // var parameters = new DialogParameters<SimpleDialog>();
+        // parameters.Add(x => x.Title, $"Deleting {Table.Name}");
+
+        // var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        // var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
+        // var _result = await _dialog.Result;
+        // if (Convert.ToBoolean(_result.Data) == true)
+        //     OnDelete(Table);
+
+        var options = new ConfirmDialogOptions { Size = DialogSize.Regular };
+
+        var confirmation = await dialog.ShowAsync(
+            title: "Simple Confirm Dialog",
+            message1: "Do you want to proceed?",
+            confirmDialogOptions: options);
+
+        if (confirmation)
+        {
+            // do whatever
+        }
+        else
+        {
+            // do whatever
+        }
+
+    }
+
+    public void Go()
+    {
+        this.user.SetTableActive(Table);
+
+        NavigationManager.NavigateTo($"work/tables/{Table.Name}");
+    }
+
+    private string getFileNameValue()
+    {
+        if (Table.FileName == null)
+            return "(value no register)";
+
+        return Table.FileName;
+    }
+
+    private string getDateCreationValue()
+    {
+        if (Table.DateCreation == null)
+            return Table.Name;
+        return Table.DateCreation.ToLongDateString();
+    }
+}

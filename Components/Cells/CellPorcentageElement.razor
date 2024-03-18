@@ -1,9 +1,9 @@
 ﻿@using System.Text.RegularExpressions
 @using System.Globalization
 @using static BlazorAppExcel.Components.CellEdit
-@* <MudTextField T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" @onkeypress="KeyBoardEventHandler" /> *@
+@* <InputText T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" @onkeypress="KeyBoardEventHandler" /> *@
 
-<MudTextField Value="@Value" ValueChanged="@((string txt) => OnValueChanged(txt))" />
+<InputText Value="@Value" ValueChanged="@((string txt) => OnValueChanged(txt))" />
 @code {
 
     private string _value;

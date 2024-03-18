@@ -11,7 +11,7 @@
 <h3>Import Excel</h3>
 @if (loading)
 {
-    <MudProgressCircular Color="Color.Default" Indeterminate="true" b/>
+    <ProgressCircular Color="Color.Default" Indeterminate="true" b/>
 }
 
 @if (ds.Count()==0)
@@ -20,7 +20,7 @@
 }
 else
 {
-    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="@clean"></MudIconButton>
+    <IconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="@clean"></IconButton>
 }
 <TabExcel ds=@ds></TabExcel>
 
