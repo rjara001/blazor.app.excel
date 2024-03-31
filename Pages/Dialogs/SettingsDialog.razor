@@ -2,49 +2,50 @@
 @using BlazorAppExcel.Models;
 @using BlazorAppExcel.Share.Enums
 @using BlazorAppExcel.Share.Models
-@inject ISnackbar Snackbar
+@* @inject ISnackbar Snackbar *@
 @using BlazorAppExcel.Components.Cells
 
-<Dialog>
-    <TitleContent>
-        <Text Typo="Typo.h6">
-            <Icon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
-            Settings Item
-        </Text>
-    </TitleContent>
-    <DialogContent>
-
+<div class="d-flex flex-column mb-3">
+  
         @foreach (var (item, index) in Columns.Select((item, index) => (item, index)))
         {
-            var typeSelected = ExcelCellTypeUtil.GetTypeFromValue(this.Types[index]).ToString();
+            var typeSelected = this.Types[index];
+            <div class="p-2">
+            <CellSelectElement Index="@index" Name="@item" Value="@typeSelected" Values="@Items" OnChildParameterChanged="@((string e)=>UpdateChildParameter(e, index))"></CellSelectElement>
+            </div>
 
-            <CellSelectElement Index="@index" Name="@item" Value="@typeSelected" Values="@Items" OnChildParameterChanged="UpdateChildParameter"></CellSelectElement>
         }
-    </DialogContent>
-    <DialogActions>
-        <Button OnClick="SaveItem">Save</Button>
-        <Button OnClick="Cancel">Cancel</Button>
+    
+</div>
 
-    </DialogActions>
-</Dialog>
+   <div class="float-end">
+        <Button Color="ButtonColor.Secondary" @onclick="Cancel">Close</Button>
+        <Button Color="ButtonColor.Primary" @onclick="SaveItem">Save changes</Button>
+   </div>
+
+
+
 
 @code {
+
+    private Modal modal = default!;
     IDictionary<string,string> Items = ExcelCellTypeUtil.GetEnumDictionary();
 
     [Parameter] public IList<string> Columns { get; set; }
-    [Parameter] public IList<int> Types { get; set; }
-    [Parameter] public Action<IList<int>> Save { get; set; }
+    [Parameter] public IList<string> Types { get; set; }
+    [Parameter] public Action<IList<string>> Save { get; set; }
+    [Parameter] public Action Cancel { get; set; }
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    // [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
     }
 
-    private void UpdateChildParameter(KeyValuePair<int, string> item)
+    private void UpdateChildParameter(string value, int index)
     {
-        this.Types[item.Key] = Convert.ToInt16(item.Value);
+        this.Types[index] = value;
     }
 
     protected override void OnParametersSet()
@@ -53,7 +54,6 @@
         // this.StateHasChanged();
     }
 
-    void Cancel() => MudDialog.Cancel();
 
     private void SaveItem()
     {

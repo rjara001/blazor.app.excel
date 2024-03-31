@@ -1,31 +1,11 @@
 ﻿@inherits LayoutComponentBase
 
-@* <ThemeProvider />
-<DialogProvider />
-<SnackbarProvider />
-
-<Layout>
-    <AppBar>
-        <IconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
-            OnClick="@((e) => DrawerToggle())" />
-        My Application
-    </AppBar>
-    <Drawer @bind-Open="@_drawerOpen">
-         <NavMenu />
-    </Drawer>
-    <MainContent>
-        <Container MaxWidth="MaxWidth.Medium">
-            @Body
-        </Container>
-    </MainContent>
-</Layout>
- *@
-
 <div class="bb-page">
 
     <Sidebar @ref="sidebar"
              IconName="IconName.BootstrapFill"
              Title="Blazor Bootstrap"
+            
              DataProvider="SidebarDataProvider" />
 
     <main>
@@ -34,15 +14,15 @@
         </div>
 
         <article class="content px-4">
-            <div class="py-2">@Body</div>
+            <div class="py-2">
+                @Body
+            </div>
         </article>
     </main>
-
 </div>
-
 @code {
-    Sidebar sidebar;
-    IEnumerable<NavItem> navItems;
+    Sidebar sidebar = default!;
+    IEnumerable<NavItem>? navItems;
 
     private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
     {
@@ -56,20 +36,47 @@
     {
         navItems = new List<NavItem>
         {
-            new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match=NavLinkMatch.All},
-            new NavItem { Id = "2", Href = "/counter", IconName = IconName.PlusSquareFill, Text = "Counter"},
-            new NavItem { Id = "3", Href = "/weather", IconName = IconName.Table, Text = "Fetch Data"},
+            new NavItem { IconName = IconName.HouseDoorFill, Text = "Design"},
+            new NavItem { Href = "/design/upload", IconName = IconName.CheckCircleFill, Text = "Upload"},
+            new NavItem { Href = "/design/tables", IconName = IconName.InputCursorText, Text = "Tables"},
+            new NavItem { Href = "/design/columns", IconName = IconName.SegmentedNav, Text = "Columns"},
+            new NavItem { IconName = IconName.LayoutSidebarInset, Text = "Work Area"},
+            new NavItem { Href = "/work/tables", IconName = IconName.SegmentedNav, Text = "Tables"},
+            new NavItem { Href = "/about", IconName = IconName.SegmentedNav, Text = "About"},
         };
-
         return navItems;
     }
 }
+@* 
 
-@code {
-    bool _drawerOpen = true;
+navItems = new List<NavItem>
+        {
+            new NavItem { Id = "1", Href = "/getting-started", IconName = IconName.HouseDoorFill, Text = "Getting Started"},
 
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
-}
+            new NavItem { Id = "2", IconName = IconName.LayoutSidebarInset, Text = "Content" },
+            new NavItem { Id = "3", Href = "/icons", IconName = IconName.PersonSquare, Text = "Icons", ParentId="2"},
+
+            new NavItem { Id = "4", IconName = IconName.ExclamationTriangleFill, Text = "Components" },
+            new NavItem { Id = "5", Href = "/alerts", IconName = IconName.CheckCircleFill, Text = "Alerts", ParentId="4"},
+            new NavItem { Id = "6", Href = "/breadcrumb", IconName = IconName.SegmentedNav, Text = "Breadcrumb", ParentId="4"},
+            new NavItem { Id = "7", Href = "/sidebar", IconName = IconName.LayoutSidebarInset, Text = "Sidebar", ParentId="4"},
+
+            new NavItem { Id = "8", IconName = IconName.WindowPlus, Text = "Forms" },
+            new NavItem { Id = "9", Href = "/autocomplete", IconName = IconName.InputCursorText, Text = "Auto Complete", ParentId="8"},
+            new NavItem { Id = "10", Href = "/currency-input", IconName = IconName.CurrencyDollar, Text = "Currency Input", ParentId="8"},
+            new NavItem { Id = "11", Href = "/number-input", IconName = IconName.InputCursor, Text = "Number Input", ParentId="8"},
+            new NavItem { Id = "12", Href = "/switch", IconName = IconName.ToggleOn, Text = "Switch", ParentId="8"},
+        };
+
+            <NavMenu>
+    <NavLink Href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
+    <NavGroup Title="Design" Expanded="true">
+        <NavLink Href="/design/upload">Upload</NavLink>
+        <NavLink Href="/design/tables">Tables</NavLink>
+        <NavLink Href="/design/columns">Columns</NavLink>
+    </NavGroup>
+    <NavGroup Title="Work Area" Expanded="true">
+        <NavLink Href="/work/tables">Tables</NavLink>
+    </NavGroup>
+    <NavLink Href="/about"  Match="NavLinkMatch.Prefix">About</NavLink>
+</NavMenu> *@

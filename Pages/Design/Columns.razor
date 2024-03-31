@@ -8,24 +8,22 @@
 
 @inject ISessionSingletonService session
 @inject IExcelService excel;
-@inject IDialogService DialogService;
 
 @page "/design/columns/{IdTableSelected?}"
 
 @if (_tables != null && _tables.Count() > 0)
 {
-    <Grid>
-        <Item xs="12">
 
-            <Select T="TableExcel" Label="Tables" ToStringFunc="@converter" Variant="Variant.Text" @bind-Value="@TableSelected">
-                @foreach (var item in this._tables)
+    <Dropdown>
+        <DropdownToggleButton Color="ButtonColor.Secondary">Tables</DropdownToggleButton>
+        <DropdownMenu>
+               @foreach (TableExcel item in this._tables)
                 {
-                    <SelectItem Value="@item"></SelectItem>
+                    <DropdownItem @onclick="@(()=>OnTableSelected(item))" To="#" Type="ButtonType.Button">@item.Name</DropdownItem>
                 }
-            </Select>
-        </Item>
-      
-    </Grid>
+            
+        </DropdownMenu>
+    </Dropdown>
 }
 
 <table class="table">
@@ -47,33 +45,30 @@
                     var indexItem = index;
                 <tr>
                     <td>
-                        <IconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>OnDeleteItem(item, indexItem))"></IconButton>
+                        @* <Icon Icon="@IconName.Alarm" aria-label="delete" OnClick="@(()=>OnDeleteItem(item, indexItem))"></Icon> *@
+                        <a @onclick:preventDefault="true" @onclick="@(e => OnDeleteItem(item, indexItem))" href="#" class="text-decoration-none">
+                            <Icon Name="IconName.Trash"></Icon>
+                        </a>
                     </td>
                         <td>
                             @if (this._editableNameColumn == item.Key)
                             {
-                            <InputText T="string" Value="@item.Name" Label="Column Name" ValueChanged="@((value)=>OnSaveChanges(value, item, indexItem))" />
+                            <CellTextElement Value="@item.Name" Name="@item.Name" OnChildParameterChanged="@((value)=>UpdateChildParameter(value, item))" OnBlur="@(()=>this._editableTypeColumn=String.Empty)"></CellTextElement>
                             }
                             else
                             {
-                                <Text onclick="@(()=>EditNameColumn(item.Key))">@item.Name</Text>
+                                <div onclick="@(()=>EditNameColumn(item.Key))">@item.Name</div>
                             }
                         </td>
                         <td>
                             @if (this._editableTypeColumn == item.Key)
                             {
-                            <CellSelectElement Index="@index" Value="@item.Type.ToString()" Values="@GetTypes()" OnChildParameterChanged="@((KeyValuePair<int, string> e)=>UpdateType(e, item))"></CellSelectElement>
-             @*                <Select T="ExcelCellType" Label="Tables" ToStringFunc="@converterEnum" Variant="Variant.Text" ValueChanged="@((value)=>OnSaveTypeChanges(value, indexItem))">
-                                @foreach (var item in GetTypes())
-                                    {
-                                        <SelectItem Value="@item"></SelectItem>
-                                    }
-                                </Select>
- *@
+                                <CellSelectElement Index="@index" Value="@item.IdType.ToString()" Values="@GetTypes()" OnChildParameterChanged="@((string e)=>UpdateType(indexItem, e, item))" OnBlur="@(()=>this._editableTypeColumn=String.Empty)"></CellSelectElement>
+                  
                             }
                             else
                             {
-                            <Text onclick="@(()=>EditTypeColumn(item.Key))">@item.Type.ToString()</Text>
+                                <div onclick="@(()=>EditTypeColumn(item.Key))">@item.Type.ToString()</div>
                             }
                     </td>
 
@@ -83,8 +78,8 @@
     </tbody>
 </table>
 
-<Button OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</Button>
-
+<Button onclick="@AddItem" Color="ButtonColor.Primary" Size="Size.Small">Add Item</Button>
+<ConfirmDialog @ref="dialog" />
 
 @code {
     private string _idTableSelected = null;
@@ -92,6 +87,13 @@
     private IList<TableExcel> _tables = null;
     private string _editableTypeColumn = string.Empty;
     private string _editableNameColumn = string.Empty;
+
+    private ConfirmDialog dialog = default!;
+
+    public void OnTableSelected(TableExcel tableExcel)
+    {
+        this.TableSelected = tableExcel;
+    }
 
     [Parameter] public string IdTableSelected { get
         {
@@ -108,17 +110,40 @@
 
     private string IdColumn { get; set; }
 
+    private async void UpdateChildParameter(string value, ColumnTable item)
+    {
+        Console.WriteLine("value:" + value);
+
+        int index = this.TableSelected.Columns.IndexOf(item.Name);
+
+        this.TableSelected.Columns[index] = value;
+
+        await excel.SetUser(session.User, TableSelected);
+
+    }
+
     private async void OnDeleteItem(ColumnTable item, int index)
     {
-        var parameters = new DialogParameters<SimpleDialog>();
-        parameters.Add(x => x.Title, $"Deleting {item.Name}");
+        try
+        {
+            var confirmation = await dialog.ShowAsync(
+    title: "Are you sure you want to delete this?",
+    message1: "This will delete the record. Once deleted can not be rolled back.",
+    message2: "Do you want to proceed?");
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+            if (confirmation)
+            {
+                // do something
+                DeleteColumn(item, index);
+            }
+        }
+        catch (Exception e)
+        {
+            
+            throw;
+        }
 
-        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
-        var _result = await _dialog.Result;
-        if (Convert.ToBoolean(_result.Data) == true)
-            DeleteColumn(item, index);
+
     }
 
     private async void DeleteColumn(ColumnTable item, int index)
@@ -149,17 +174,15 @@
 
         TableSelected.Columns[index] = value;
 
-        TableSelected.Types[index] = (int)item.Type;
+        TableSelected.Types[index] = item.IdType;
 
         await excel.SetUser(session.User, TableSelected);
     }
 
-    private async void UpdateType(KeyValuePair<int, string> e, ColumnTable item)
+    private async void UpdateType(int index, string newValue, ColumnTable item)
     {
-        int index = Convert.ToInt16(e.Key);
-        int value = Convert.ToInt16(e.Value);
-
-        item.Type = (ExcelCellType)value;
+ 
+        item.IdType = Convert.ToInt16(newValue);
 
         await OnSaveChanges(item.Name, item, index);
     }
@@ -195,7 +218,7 @@
         return obj;
     }
 
-    void AddItem()
+    async void AddItem()
     {
 
         this.TableSelected.Columns.Add("new column");
@@ -205,6 +228,8 @@
         {
             row.Values.Add("");
         }
+
+        await this.excel.SetUser(session.User, this.TableSelected);
     }
 
     protected override void OnInitialized()

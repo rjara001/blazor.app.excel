@@ -1,18 +1,31 @@
-﻿@* <Switch @bind-Value="ValueString" Label="@Name"/> *@
-
-<Field Label="@Name" Variant="Variant.Text" InnerPadding="false">
-    <RadioGroup T="string" @bind-Value="Value">
-        <Radio Value="@("true")" T="string">Yes</MudRadio>
-        <Radio Value="@("false")" T="string">No</MudRadio>
-    </MudRadioGroup>
-</MudField>
+﻿
+<div class="form-floating mb-3">
+     <div class="form-group row">
+        <label class="col-4">@Name</label>
+        <div class="col-8">
+            <InputRadioGroup @bind-Value="@Value" Name="@Name">
+                <div class="form-check form-check-inline">
+                    <InputRadio class="form-check-input" Value="true"/>
+                    <label class="form-check-label" for="inlineRadio1">Yes</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <InputRadio class="form-check-input" Value="false" />
+                    <label class="form-check-label" for="inlineRadio2">No</label>
+                </div>
+            </InputRadioGroup>
+        </div>
+    </div>
+    <label for="sel1" class="form-label">@Name</label>
+</div>
 
 @code {
-    private string _value;
+    private bool _value;
+    private Switch switch1 = default!;
+
     [Parameter]
     public EventCallback<string> OnChildParameterChanged { get; set; }
 
-    [Parameter] public string Value
+    [Parameter] public bool Value
     {
         get
         {
@@ -23,7 +36,7 @@
 
             if (_value == value) return;
                 this._value = value;
-            OnChildParameterChanged.InvokeAsync(value);
+            OnChildParameterChanged.InvokeAsync(Convert.ToString(value));
         }
     }
 

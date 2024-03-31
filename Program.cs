@@ -22,6 +22,7 @@ builder.Services.AddHttpClient("MyNamedClient", client =>
     // You can configure other properties of HttpClient here if needed
 });
 
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddTransient<IExcelService, ExcelService>();
 builder.Services.AddSingleton<ISessionSingletonService, SessionSingletonService>();

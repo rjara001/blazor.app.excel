@@ -1,5 +1,7 @@
-﻿<DateInput T="string" @bind-Date="ValueDateTime" Label="@Name" />
-
+﻿<div class="form-floating mb-3">
+    <DateInput T="string" @bind-Value="ValueDateTime" Label="@Name" />
+    <label for="floatingTextarea">@Name</label>
+</div>
 @code {
     private DateTime _value;
 

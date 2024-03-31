@@ -11,16 +11,18 @@
 <h3>Import Excel</h3>
 @if (loading)
 {
-    <ProgressCircular Color="Color.Default" Indeterminate="true" b/>
+    @* <ProgressCircular Color="Color.Default" Indeterminate="true" b/> *@
+    <Preload LoadingText="Loading..." />
 }
 
 @if (ds.Count()==0)
 {
-    <FileUpload OnChange="(e)=> ImportFileExcel(e)"></FileUpload>
+    <InputFile OnChange="(e)=> ImportFileExcel(e)"></InputFile>
+
 }
 else
 {
-    <IconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="@clean"></IconButton>
+    <Button OnClick="@clean"></Button>
 }
 <TabExcel ds=@ds></TabExcel>
 

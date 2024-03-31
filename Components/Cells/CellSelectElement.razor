@@ -1,22 +1,13 @@
-﻿@* <Select T="string" Label="@Name" AnchorOrigin="Origin.BottomCenter" @bind-Value="Value">
-
+﻿
+<label for="select1" class="col-4 col-form-label">@Name</label>
+<select class="form-select" aria-label="Default select example" @bind="Value" @onblur="OnValueChanged">
+    @* @onblur="@(()=>OnBlur.InvokeAsync())"> *@
     @foreach (var item in Values)
     {
-        <SelectItem Value="@item.Key">@item.Value</SelectItem>
+        <option value="@item.Key">@item.Value</option>
     }
+</select>
 
-</Select>
- *@
-<Dropdown>
-    <DropdownToggleButton Color="ButtonColor.Secondary">@Name</DropdownToggleButton>
-    <DropdownMenu>
-            @foreach (var item in Values)
-    {
-        <DropdownItem To="#" Type="ButtonType.Link">@item.Value</DropdownItem>
-    }
-         
-    </DropdownMenu>
-</Dropdown>
 
 @code {
     [Parameter] public IDictionary<string,string> Values { get; set; }
@@ -25,7 +16,9 @@
     private string _value;
 
     [Parameter]
-    public EventCallback<KeyValuePair<int, string>> OnChildParameterChanged { get; set; }
+    public EventCallback<string> OnChildParameterChanged { get; set; }
+    [Parameter]
+    public EventCallback<string> OnBlur { get; set; }
 
     [Parameter]
     public string Value
@@ -37,10 +30,21 @@
         set
         {
             if (_value == value) return;
+            Console.WriteLine("paso2:");
             this._value = value;
-            OnChildParameterChanged.InvokeAsync(new KeyValuePair<int,string>(Index, value));
-
+            Console.WriteLine("paso3:");
+            OnChildParameterChanged.InvokeAsync(value);
+            Console.WriteLine("paso4:");
         }
+    }
+
+    private void OnValueChanged(FocusEventArgs args)
+    {
+        // Handle value change here
+        // this.Value = args.Value.ToString();
+        Console.WriteLine("OnBlur");
+
+        this.OnBlur.InvokeAsync();
     }
 
     [Parameter] public string Name { get; set; }

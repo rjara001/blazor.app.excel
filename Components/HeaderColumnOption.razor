@@ -1,0 +1,56 @@
+﻿<div class="d-flex justify-content-center">
+    <div>
+        @switch (Column)
+        {
+            case 1:
+                <a @onclick:preventDefault="true" href="#" @onclick="@(()=>OnClickOrder(2, Index))"><i class="bi bi-arrow-up-short"></i></a>
+
+                break;
+            case 2:
+                <a @onclick:preventDefault="true" href="#" @onclick="@(()=>OnClickOrder(1, Index))"><i class="bi bi-arrow-down-short"></i></a>
+                break;
+            default:
+             
+                    <a @onclick:preventDefault="true" href="#" @onclick="@(()=>OnClickOrder(1, Index))"><i class="bi bi-arrow-up-short"></i></a>
+                    break;
+        }
+
+    </div>
+    <div>@Name</div>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Column { get; set; }
+
+    [Parameter]
+    public int Index { get; set; }
+
+    [Parameter]
+    public string Name { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<int> OnChangeOrder { get; set; }
+
+    private async void OnClickOrder(int order, int index)
+    {
+        await this.OnChangeOrder.InvokeAsync(order);
+
+
+        // if (order == 1)
+        // {
+        //     await this.OnChangeOrder.InvokeAsync(order);
+
+        //     Column = 2;
+        //     this.Table.Rows = this.Table.Rows.OrderBy(row => row.Values[index]).ToList();
+        // }
+        // else
+        // {
+        //     Column = 1;
+        //     this.Table.Rows = this.Table.Rows.OrderByDescending(row => row.Values[index]).ToList();
+        // }
+
+        // await this.OnAfterRenderAsync(true);
+    }
+}

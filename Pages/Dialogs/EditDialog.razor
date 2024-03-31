@@ -2,36 +2,27 @@
 @using BlazorAppExcel.Models;
 @using BlazorAppExcel.Share.Models
 
-<Dialog>
-    <TitleContent>
-        <Text Typo="Typo.h6">
-            <Icon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
-            Edit Item
-        </Text>
-    </TitleContent>
-    <DialogContent>
-        @foreach (var item in RowExcel.Cells)
-        {
-            <CellEdit Item="@item" UniqueValues="@UniqueValues(item.Name)"></CellEdit>
-        }
 
-    </DialogContent>
-    <DialogActions>
-        <Button OnClick="SaveItem">Save</Button>
-        <Button OnClick="Cancel">Cancel</Button>
+@foreach (var item in RowExcel.Cells)
+{
+    <CellEdit Item="@item" UniqueValues="@UniqueValues(item.Name)"></CellEdit>
+}
 
-    </DialogActions>
-</Dialog>
-
+<div class="float-end">
+    <Button Color="ButtonColor.Secondary" @onclick="Cancel">Close</Button>
+    <Button Color="ButtonColor.Primary" @onclick="SaveItem">Save changes</Button>
+</div>
 @code {
+    private Modal modal = default!;
+
     [Parameter] public RowCellExcel RowExcel { get; set; }
     [Parameter] public Action<RowCellExcel> Save { get; set; }
-
+    [Parameter] public Action Cancel { get; set; }
     [Parameter] public TableExcel TableExcel { get; set; }
 
     public IDictionary<string, string> Values = new Dictionary<string, string>();
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    // [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     protected override void OnInitialized()
     {
@@ -47,11 +38,6 @@
             return TableExcel.UniqueValues[name];
 
         return new List<string>();
-    }
-
-    private void Cancel()
-    {
-        MudDialog.Cancel();
     }
 
     private void SaveItem()

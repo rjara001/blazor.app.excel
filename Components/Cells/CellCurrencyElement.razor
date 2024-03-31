@@ -1,7 +1,17 @@
 ﻿@using System.Text.RegularExpressions
 @using static BlazorAppExcel.Components.CellEdit
 
-<InputText T="string" @bind-Value="Value" Label="@Name" OnError="HandleError" />
+
+<div class="form-floating mb-3">
+    @* <InputText  @bind-Value="Value" Label="" /> *@
+    <InputText T="string" class="form-control" @bind-Value="Value" Label="@Name" placeholder="@Name" />
+@*     <CurrencyInput class="form-control" TValue="double"
+                   @bind-Value="@_value"
+                   HideCurrencySymbol="true"
+                   Placeholder="@Name" /> *@
+
+    <label for="floatingInput">@Name</label>
+</div>
 
 @code {
 
@@ -10,10 +20,12 @@
     [Parameter]
     public EventCallback<string> OnChildParameterChanged { get; set; }
 
-    [Parameter] public string Value {
+    [Parameter]
+    public string Value
+    {
         get
         {
-            return this._value;
+            return this._value.ToString();
         }
         set
         {

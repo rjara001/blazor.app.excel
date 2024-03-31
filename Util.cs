@@ -3,10 +3,14 @@ using BlazorAppExcel.Components;
 using BlazorAppExcel.Models;
 using BlazorAppExcel.Share.Enums;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Text;
+using static MudBlazor.CategoryTypes;
 
 public class Util
 {
@@ -153,7 +157,7 @@ public class Util
             input = "0" + input;
         }
 
-        if (type == ExcelCellType.Porcentage)
+        if (type == ExcelCellType.Percentage)
         {
             input = input.Replace("%", string.Empty);
         }
@@ -164,5 +168,115 @@ public class Util
 
        
         return input;
+    }
+    public static bool CheckTypes(CellExcel cellExcel)
+    {
+        switch ((ExcelCellType)cellExcel.Type)
+        {
+            case ExcelCellType.String:
+                // No validation for string type
+                return true;
+            case ExcelCellType.Number:
+                return IsNumber(cellExcel.Value);
+            case ExcelCellType.DateTime:
+                return IsDateTime(cellExcel.Value);
+            case ExcelCellType.Boolean:
+                return IsBoolean(cellExcel.Value);
+            case ExcelCellType.Decimal:
+                return IsDecimal(cellExcel.Value);
+            case ExcelCellType.Unique:
+                return true;
+            case ExcelCellType.Currency:
+                return IsCurrency(cellExcel.Value);
+            case ExcelCellType.Percentage:
+                return IsPercentage(cellExcel.Value);
+            case ExcelCellType.Period:
+                return IsPeriod(cellExcel.Value);
+            default:
+                // For unsupported types, consider them valid
+                return true;
+        }
+    }
+
+    public static bool IsNumber(string value)
+    {
+        return double.TryParse(value, out _);
+    }
+
+    public static bool IsDateTime(string value)
+    {
+        return DateTime.TryParse(value, out _);
+    }
+
+    public static bool IsBoolean(string value)
+    {
+        return bool.TryParse(value, out _);
+    }
+
+    public static bool IsDecimal(string value)
+    {
+        return decimal.TryParse(value, out _);
+    }
+
+    public static bool IsCurrency(string value)
+    {
+
+        return IsDecimal(value);
+    }
+
+    public static bool IsPercentage(string value)
+    {
+
+        return IsDecimal(value);
+    }
+
+    public static bool IsPeriod(string value)
+    {
+
+        return false;
+    }
+
+    public static string getDSToExcel(TableExcel table)
+    {
+    
+        using (MemoryStream memoryStream = new MemoryStream())
+        {
+           
+            IWorkbook wb = new XSSFWorkbook();
+            ISheet sheet = wb.CreateSheet("Sheet1");
+            ICreationHelper cH = wb.GetCreationHelper();
+
+            IRow row = sheet.CreateRow(0);
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+
+                ICell cell = row.CreateCell(i);
+                var cellTtext = table.Columns[i];
+                cell.SetCellValue(cH.CreateRichTextString(cellTtext));
+            }
+
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                RowExcel _tableRow = table.Rows[i];
+
+                row = sheet.CreateRow(i+1);
+                for (int j = 0; j < table.Columns.Count; j++)
+                {
+                    for (int k = 0; k < _tableRow.Values.Count;k++)
+                    {
+                        var item = _tableRow.Values[k];
+
+                        ICell cell = row.CreateCell(k);
+                        var cellTtext = item.ToString();
+                        cell.SetCellValue(cH.CreateRichTextString(cellTtext));
+                    }
+                    
+                }
+            }
+            wb.Write(memoryStream);
+            //memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return Convert.ToBase64String(memoryStream.ToArray());
+        }
     }
 }

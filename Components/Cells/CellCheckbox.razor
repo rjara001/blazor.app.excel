@@ -1,0 +1,29 @@
+﻿<input type="checkbox" @bind="Value">
+
+@code {
+
+    private bool _value;
+
+    [Parameter]
+    public bool Value
+    {
+        get
+        {
+            return _value;
+
+        }
+        set
+        {
+            if (_value == value) return;
+            this._value = value;
+
+            ValueChanged.InvokeAsync(Value);
+            OnChanged.InvokeAsync(Value);
+        }
+    }
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnChanged { get; set; }
+}

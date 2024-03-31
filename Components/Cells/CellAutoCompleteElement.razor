@@ -1,11 +1,46 @@
 ﻿@using System.Globalization
 @using static BlazorAppExcel.Components.CellEdit
 
-<MudAutocomplete T="string" Label="@Name" @bind-Value="Value" SearchFunc="@Search"
-                 CoerceValue="true"
-                 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+<div class="form-floating mb-3">
+
+    <AutoComplete class="form-control" TItem="KeyValuePair<int,string>" Label="@Name"
+                  @bind-Value="Value" 
+                    DataProvider="Search"
+                  Placeholder="@Name"
+                     PropertyName="Value"
+                     AdornmentColor="Color.Primary" />
+
+</div>
+
 @code {
 
+    public class Customer
+    {
+        public string CustomerName { get; set; }
+        public int Id { get; set; }
+
+        public Customer(int id, string name)
+        {
+            this.Id = id;
+            this.CustomerName = name;
+        }
+    }
+
+    public IDictionary<int,string> values;
+
+    private async Task<AutoCompleteDataProviderResult<KeyValuePair<int, string>>> Search(AutoCompleteDataProviderRequest<KeyValuePair<int, string>> request)
+    {
+        if (values is null)
+            values = Values.Select((value, index) => new { Index = index, Value = value })
+                                               .ToDictionary(item => item.Index, item => item.Value);
+
+
+        return await Task.FromResult(request.ApplyTo(values));
+        //return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase)).Select(word => new AutoCompleteDataProviderResult<string>() { Data = customers, TotalCount = customers.Count() });
+        // return await Task.FromResult(request.ApplyTo(list));
+        //return await Task.FromResult(new AutoCompleteDataProviderResult<string> { Data = list, TotalCount = list.Count() });
+    }
+   
     private string _value;
 
     [Parameter]
@@ -35,7 +70,7 @@
 
     private void OnComboValueChanged(string value)
     {
-        string porcentageValue = Util.ExtractNumberFromString(value, Share.Enums.ExcelCellType.Porcentage);
+        string porcentageValue = Util.ExtractNumberFromString(value, Share.Enums.ExcelCellType.Percentage);
 
 
         try
@@ -61,11 +96,4 @@
         }
     }
 
-    private async Task<IEnumerable<string>> Search(string value)
-    {
-        // if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
-            return new string[0];
-        return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
 }

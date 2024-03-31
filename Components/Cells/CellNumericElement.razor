@@ -1,6 +1,10 @@
 ﻿@using BlazorAppExcel.Share.Enums
 
-<NumericField @bind-Value="ValueInt64" Label="@Name" />
+
+<div class="form-floating mb-3">
+    <NumberInput @bind-Value="ValueInt64" Label="@Name" />
+    <label for="floatingInput">@Name</label>
+</div>
 
 @code {
     private Int64 _value;

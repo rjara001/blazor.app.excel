@@ -6,10 +6,12 @@
 @using BlazorAppExcel.Pages.Dialogs
 @using Blazored.LocalStorage
 @using BlazorAppExcel.Share.Models;
+@using System.Data
 
 @inject ISessionSingletonService session;
-@inject IDialogService DialogService;
+@* @inject IDialogService DialogService; *@
 @inject IExcelService excelService
+@inject IJSRuntime JSRuntime
 
 <h3>App @Value</h3>
 
@@ -20,18 +22,35 @@
 <button class="btn btn-primary" @onclick="Settings">
     <i class="glyphicon glyphicon-plus"></i> Settings
 </button>
+<button class="btn btn-primary" @onclick="Download">
+    <i class="glyphicon glyphicon-plus"></i> Download
+</button>
 
-<TableDynamic table=@table @ref="childComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true" OnSaveColumn="OnSaveColumn"></TableDynamic>
+<button class="btn btn-primary" @onclick="CopyAllSelected">
+    <i class="glyphicon glyphicon-plus"></i> Copy
+</button>
 
+<button class="btn btn-primary" @onclick="DeleteAllSelected">
+    <i class="glyphicon glyphicon-plus"></i> Delete
+</button>
+
+
+<TableDynamic table=@table @ref="tableDynamicComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true" OnSaveColumn="OnSaveColumn"></TableDynamic>
+
+<Modal @ref="_dialogTable" />
+<Modal @ref="_dialogSettings" />
 @code {
     private TableExcel table;                                                                                                
     private TableDynamic childComponentRef;
 
+    private TableDynamic tableDynamicComponentRef;
+
     [Parameter]
     public string Value { get; set; }
 
-    IDialogReference _dialogTable;
-    IDialogReference _dialogSettings;
+    Modal _dialogTable = default!;
+    Modal _dialogSettings = default!;
+    private TableDynamic tableDynamic = default!;
 
     private async void Delete(int index)
     {
@@ -48,49 +67,85 @@
 
     private async void OnSaveColumn(int index, string value)
     {
-        
+
         this.table.Columns[index] = value;
 
         await this.excelService.SetUser(session.User, this.table);
     }
 
-    private void Edit(RowCellExcel row)
+    private async void Edit(RowCellExcel row)
     {
-        var parameters = new DialogParameters<EditDialog>();
-        parameters.Add(x => x.RowExcel, row);
-        parameters.Add(x => x.Save, this.OnSave);
-        parameters.Add(x => x.TableExcel, table);
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("RowExcel", row);
+        parameters.Add("Save", (Action<RowCellExcel>)((row) => this.OnSave(row)));
+        parameters.Add("Cancel", (Action)(async () => await _dialogTable.HideAsync()));
+        parameters.Add("TableExcel", table);
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
-
-        _dialogTable = DialogService.Show<EditDialog>("Simple Dialog", parameters, options);
+        await _dialogTable.ShowAsync<EditDialog>(title: "Editing Record", parameters: parameters);
     }
 
-    private void AddNew()
+
+    private async void AddNew()
     {
         IList<string> columns = table.Columns;
 
         RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Types, table.Rows.Count()+1);
 
-        var parameters = new DialogParameters<EditDialog>();
-        parameters.Add(x => x.RowExcel, _newRow);
-        parameters.Add(x => x.Save, this.OnSave);
-        parameters.Add(x => x.TableExcel, table);
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("RowExcel", _newRow);
+        parameters.Add("Save", (Action<RowCellExcel>)((row) => this.OnSave(row)));
+        parameters.Add("Cancel", (Action)(async () => await _dialogTable.HideAsync()));
+        parameters.Add("TableExcel", table);
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
-
-        _dialogTable = DialogService.Show<EditDialog>("Simple Dialog", parameters, options);
+        await _dialogTable.ShowAsync<EditDialog>(title: "Creating Record", parameters: parameters);
 
     }
 
-    private void Settings()
+    private async void Settings()
     {
-        var parameters = new DialogParameters<SettingsDialog>();
-        parameters.Add(x => x.Columns, this.table.Columns);
-        parameters.Add(x => x.Types, this.table.Types);
-        parameters.Add(x => x.Save, this.OnSaveType);
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("Columns", this.table.Columns);
+        parameters.Add("Types", this.table.Types.Select(_ => Convert.ToString(_)).ToList());
+        parameters.Add("Save", (Action<IList<string>>)((row) => this.OnSaveType(row)));
+        parameters.Add("Cancel", (Action)(async () => await _dialogSettings.HideAsync()));
 
-        _dialogSettings = DialogService.Show<SettingsDialog>("Simple Dialog", parameters);
+        await _dialogSettings.ShowAsync<SettingsDialog>(title: "Setting Types", parameters: parameters);
+    }
+
+    private async void Download()
+    {
+
+        try
+        {
+
+            var result = Util.getDSToExcel(this.table);
+
+            await JSRuntime.InvokeVoidAsync("saveAsFile", $"{this.table.Name}.xlsx", result);
+
+        }
+        catch(Exception e)
+        {
+            Console.Write(e);
+        }
+
+
+        // Download the file
+
+
+    }
+
+    protected async void CopyAllSelected()
+    {
+        this.tableDynamicComponentRef.CopyRowsSelected();
+
+        await this.excelService.SetUser(session.User, table);
+    }
+
+    protected async void DeleteAllSelected()
+    {
+        this.tableDynamicComponentRef.DeleteRowsSelected();
+
+        await this.excelService.SetUser(session.User, table);
     }
 
     protected override void OnParametersSet()
@@ -99,13 +154,13 @@
         table = session.User.TableActive;
     }
 
-    public async void OnSaveType(IList<int> types)
+    public async void OnSaveType(IList<string> types)
     {
-        this.table.Types = types;
+        this.table.Types = types.Select(_=>Convert.ToInt32(_)).ToList();
 
         await this.excelService.SetUser(session.User, table);
 
-        _dialogSettings.Close();
+        await _dialogSettings.HideAsync();
 
     }
 
@@ -113,22 +168,13 @@
     {
         RowExcel item = null;
 
-        if (this.table.Rows.Count() < row.Id)
-        {
-            item = row.NewRowExcel();
-            this.table.Rows.Add(item);
-        }      
-        else
-            item = this.table.Rows[row.Id];
-
-        for (int i = 0; i < row.Columns.Count; i++)
-        {
-            item.Values[i] = row.Cells[i].Value;
-        }
+ 
+        RowCellExcel.AddRow(this.table, row);
+    
 
         await this.excelService.SetUser(session.User, table);
 
-        _dialogTable.Close();
+        await _dialogTable.HideAsync();
 
         this.StateHasChanged();
     }
@@ -138,4 +184,10 @@
         base.OnInitialized();
 
     }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     await JSRuntime.InvokeVoidAsync("setModalDraggableAndResizable");
+    //     await base.OnAfterRenderAsync(firstRender);
+    // }
 }

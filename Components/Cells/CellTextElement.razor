@@ -1,11 +1,21 @@
 ﻿@using static BlazorAppExcel.Components.CellEdit
-<InputText T="string" @bind-Value="Value" Label="@Name" /> 
+
+@* <div class="input-group input-group-sm mb-3">
+    <span class="input-group-text" id="inputGroup-sizing-sm">@Name</span>
+    <InputText T="string" class="form-control" @bind-Value="Value" Label="@Name" placeholder="@Name" />
+</div> *@
+<div class="form-floating mb-3">
+    <InputText T="string" class="form-control" @bind-Value="Value" Label="@Name" placeholder="@Name" @onblur="OnInputBlur" />
+    <label for="floatingInput">@Name</label>
+</div>
 @code {
 
     private string _value;
 
     [Parameter]
     public EventCallback<string> OnChildParameterChanged { get; set; }
+    [Parameter]
+    public EventCallback<string> OnBlur { get; set; }
 
     [Parameter] public string Value {
         get
@@ -27,9 +37,17 @@
 
     private async Task<IEnumerable<string>> Search(string value)
     {
-// if text is null or empty, don't return values (drop-down will not open)
+        // if text is null or empty, don't return values (drop-down will not open)
         if (string.IsNullOrEmpty(value))
             return new string[0];
         return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private void OnInputBlur(FocusEventArgs args)
+    {
+        // This method will be called when the input field loses focus
+        // You can perform any action here, such as validation or updating other components
+
+        this.OnBlur.InvokeAsync();
     }
 }

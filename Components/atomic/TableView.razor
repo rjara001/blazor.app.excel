@@ -1,28 +1,47 @@
 ﻿@using BlazorAppExcel.Models
 @using BlazorAppExcel.Share.Models
+@using BlazorAppExcel.Components.Cells
+@using System.Linq
 
-@inject IDialogService DialogService
+@* @inject IDialogService DialogService *@
+  <style>
+    /* Define a custom width for the options column */
+    .options-column {
+      width: 10%; /* Adjust the width as needed */
+    }
+  </style>
 
 <table class="table">
     <thead>
         <tr>
             @if (AllowedEdit)
             {
-                <th colspan="2">Edit</th>
+                <th colspan="3" class="options-column">Edit</th>
             }
             @for (int index = 0; index<Table.Columns.Count();index++)
             {
                 var column = Table.Columns[index];
-                var indexItem = index;
-                <th><HeaderColumn Value="@column" Name="Column" OnChildParameterChanged="(value)=>SaveColumn(indexItem, value)"></HeaderColumn></th>
+                int indexColumn = index;
+
+                if (ColumnOrder!=null)
+                {
+                    var order = ColumnOrder[indexColumn];
+                    <th>
+                        <HeaderColumnOption Name="@column" Column="order" OnChangeOrder="((order)=>OnChangeOrder(order, indexColumn))"></HeaderColumnOption>
+                    </th>
+                }
+                else
+                {
+                    <th>@column</th>
+                }
+
             }
         </tr>
     </thead>
     <tbody>
        
-        @if (Table!=null)
+        @if (Table != null && rows.Count()>0)
         {
-            rows = SplitListIntoNSublists<RowExcel>(Table.Rows, 20);
 
             @foreach (var (row, index) in rows[IndexPag - 1].Select((item, index) => (item, index)))
             {
@@ -33,11 +52,22 @@
                     @if (AllowedEdit)
                     {
                         <td>
-                            <button @onclick="@(e => OnEdit(row.getCellExcel(columns, Table.Types, index)))">Edit</button>
+                            <a @onclick:preventDefault="true" @onclick="@(e => OnEdit(row.getCellExcel(columns, Table.Types, index)))" href="#" class="text-decoration-none">
+                                <Icon Name="IconName.Pencil"></Icon>
+                            </a>
                         </td>
                         <td>
-                            <button @onclick="@(e => Delete(index))">Delete</button>
+                            <a @onclick:preventDefault="true" @onclick="@(e => Delete(index))" href="#" class="text-decoration-none">
+                                <Icon Name="IconName.Trash"></Icon>
+                            </a>  
+
                         </td>
+                        <td>
+
+                            <CellCheckbox @bind-Value="RowsSelected[index]" OnChanged="@OnChangeSelection"></CellCheckbox>
+
+                        </td>
+
                     }
 
                     @foreach (string cell in @row.Values)
@@ -52,8 +82,8 @@
 
     </tbody>
 </table>
-
-<MudPagination Color="Color.Primary" Count="@rows.Count()" @bind-Selected="@IndexPag" />
+<ConfirmDialog @ref="dialog" />
+<Pagination Color="Color.Primary" ActivePageNumber="@IndexPag" TotalPages="@TotalPage()" PageChanged="OnPageChangedAsync" />
 
 @code {
     [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
@@ -68,8 +98,59 @@
 
     List<List<RowExcel>> rows = new List<List<RowExcel>>();
 
+    private List<int> _columnOrder;
+
+    List<int> ColumnOrder
+    {
+        get
+        {
+            if (this._columnOrder==null)
+                this._columnOrder = Enumerable.Repeat(0, Table.Columns.Count).ToList();
+
+            return this._columnOrder;
+        }
+    }
+
+    [Parameter]
+    public EventCallback<IList<bool>> RowsSelectedChanged { get; set; }
+
+    private IList<bool> RowsSelected { get; set; } = new List<bool>();
+
+    private ConfirmDialog dialog = default!;
+
     public int IndexPag { get; set; } = 1;
 
+    // private ConfirmDialog dialog;
+    private Modal modal = default!;
+
+    private async void OnChangeOrder(int order, int index)
+    {
+        try
+        {
+
+            if (order==1)
+                this.Table.Rows = this.Table.Rows.OrderBy(row => row.Values[index]).ToList();
+            else
+                this.Table.Rows = this.Table.Rows.OrderByDescending(row => row.Values[index]).ToList();
+
+            this.ColumnOrder[index] = order;
+
+            await this.OnAfterRenderAsync(true);
+        }
+        catch (Exception e)
+        {
+            
+            throw;
+        }
+
+
+    }
+
+    private void OnChangeSelection(bool value)
+    {
+        RowsSelectedChanged.InvokeAsync(); 
+        // OnRowsSelectedChanged.InvokeAsync(RowsSelected);
+    }
     private void SaveColumn(int index, string value)
     {
 
@@ -81,18 +162,80 @@
         base.OnInitialized();
     }
 
+    private int TotalPage()
+    {
+        return rows.Count();
+    }
+
+    public async void CopyRowsSelected()
+    {
+        try
+        {
+            for (int i = 0; i < this.RowsSelected.Count; i++)
+                if (this.RowsSelected[i])
+                    RowCellExcel.CopyRow(this.Table, i);
+        }
+        catch (Exception e)
+        {
+
+            throw;
+        }
+
+        await this.OnAfterRenderAsync(true);
+
+
+    }
+
+    public async void DeleteRowsSelected()
+    {
+        var confirmation = await dialog.ShowAsync(
+                    title: "Are you sure you want to delete this?",
+                    message1: "This will delete the record. Once deleted can not be rolled back.",
+                    message2: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            _DeleteRowsSelected();
+        }
+    }
+
+    public async void _DeleteRowsSelected()
+    {
+        try
+        {
+ 
+            for (int i = this.RowsSelected.Count - 1; i >= 0; i--)
+            {
+                if (this.RowsSelected[i])
+                {
+                    RowCellExcel.DeleteRow(this.Table, i);
+                    this.RowsSelected.RemoveAt(i);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+
+            throw;
+        }
+
+        await this.OnAfterRenderAsync(true);
+
+
+    }
+
     private async void Delete(int index)
     {
-        var parameters = new DialogParameters<SimpleDialog>();
-        parameters.Add(x => x.Title, $"Deleting row ({index})");
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        var confirmation = await dialog.ShowAsync(
+          title: "Are you sure you want to delete this?",
+          message1: "This will delete the record. Once deleted can not be rolled back.",
+          message2: "Do you want to proceed?");
 
-        var _dialog = await DialogService.ShowAsync<SimpleDialog>("Simple Dialog", parameters, options);
-        var _result = await _dialog.Result;
-        if (Convert.ToBoolean(_result.Data) == true)
+        if (confirmation)
         {
             OnDelete(index);
+            await this.OnAfterRenderAsync(true);
         }
     }
 
@@ -114,5 +257,22 @@
         }
 
         return sublists;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            rows = SplitListIntoNSublists<RowExcel>(Table.Rows, 20);
+            RowsSelected = Enumerable.Repeat(false, Table.Rows.Count).ToList();
+
+            this.StateHasChanged();
+        }
+    }
+    private async Task OnPageChangedAsync(int newPageNumber)
+    {
+        await Task.Run(() => { IndexPag = newPageNumber; });
+
+
     }
 }

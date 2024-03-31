@@ -2,36 +2,32 @@
 @using BlazorAppExcel.Models
 @inject NavigationManager NavigationManager;
 @inject ISessionSingletonService user;
-@* @inject IDialogService DialogService; *@
 @inject IExcelService excelService;
 
 <Card>
-    <CardHeader>
-                   @if (!IsTitleEditable)
-            {
-                <div onclick="@EnableEditTitle">
-                    @Table.Name
-                </div>
-            }
-            else
-            {
-                <InputText  @bind-Value="Table.Name" Label="Tab Name" Variant="Variant.Text" OnBlur="DisableEditTitle"></InputText>
-            }
-       @* 
-        <CardHeaderActions>
-           
-            <Menu Icon="@Icons.Material.Filled.Settings" Color="Color.Primary">
-                    <MenuItem OnClick="()=> Go()">Edit</MenuItem>
-                    <MenuItem OnClick="() => Delete()">Delete</MenuItem>
-            </Menu>
-        </CardHeaderActions> *@
-    </CardHeader>
     <CardBody>
-        <div Typo="Typo.body2">@getFileNameValue()</div>
+       
+        <div class="d-flex justify-content-between">
+            <CardTitle>
+                @if (!IsTitleEditable)
+                {
+                    <div onclick="@EnableEditTitle">
+                        @Table.Name
+                    </div>
+                }
+                else
+                {
+                    <InputText @bind-Value="Table.Name" Label="Tab Name" Variant="Variant.Text" OnBlur="DisableEditTitle"></InputText>
+                }
+            </CardTitle>
+            <CardSubTitle Class="mb-2 text-muted">@getDateCreationValue()</CardSubTitle>
+        </div>
+        
+        <CardSubTitle Class="mb-2 text-muted">@getFileNameValue()</CardSubTitle>
+        
+   
+        <CardLink @onclick="Go" To="#">Edit</CardLink>
     </CardBody>
-@*     <CardActions>
-            <Button Variant="Variant.Text" Color="Color.Primary" OnClick="() => Go()">@getDateCreationValue()</Button>
-    </CardActions> *@
 </Card>
 
 @code {

@@ -15,24 +15,26 @@
 }
 else
 {
-    <TableView Table="@table" AllowedEdit="@AllowedEdit" OnEdit="@OnEdit" OnDelete="@OnDelete" OnSaveColumn="@OnSaveColumn"></TableView>
+    <TableView @ref="tableComponentRef" Table="@table" AllowedEdit="@AllowedEdit" OnEdit="@OnEdit" OnDelete="@OnDelete" OnSaveColumn="@OnSaveColumn"></TableView>
 }
 
 @code {
-    
+
     [Parameter]
     public bool AllowedEdit { get; set; } = false;
 
     [Parameter]
     public TableExcel table { get; set; } = new TableExcel();
 
-    [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
-    [Parameter] public Action<int> OnDelete { get; set; }
-    [Parameter] public Action<int, string> OnSaveColumn { get; set; }
+    [Parameter] public Action<RowCellExcel> OnEdit { get; set; } = default!;
+    [Parameter] public Action<int> OnDelete { get; set; } = default!;
+    [Parameter] public Action<int, string> OnSaveColumn { get; set; } = default!;
 
     private string tabName = string.Empty;
 
     string id_table = string.Empty;
+
+    TableView tableComponentRef;
 
     protected override void OnInitialized()
     {
@@ -41,5 +43,16 @@ else
         tabName = table?.Name;
 
     }
-  
+
+    public void CopyRowsSelected()
+    {
+        tableComponentRef.CopyRowsSelected();
+        this.StateHasChanged();
+    }
+
+    public void DeleteRowsSelected()
+    {
+        tableComponentRef.DeleteRowsSelected();
+        this.StateHasChanged();
+    }
 }

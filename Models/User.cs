@@ -29,7 +29,8 @@ namespace BlazorAppExcel.Models
         public void SetTables(IList<TableExcel> tables)
         {
             foreach (var table in tables) {
-                this.Tables.Add(table.Name, table);
+                if (!this.Tables.ContainsKey(table.Name))
+                    this.Tables.Add(table.Name, table);
             }
         }
 
