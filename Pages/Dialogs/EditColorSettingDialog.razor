@@ -1,0 +1,52 @@
+﻿@using BlazorAppExcel.Components.Cells
+@using BlazorAppExcel.Models;
+@using BlazorAppExcel.Share.Models
+
+<table class="table">
+        <thead>
+            <tr>
+            <td>Color</td>
+            <td>Value</td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in UniqueValues)
+        {
+            <tr>
+                <td><CellColorPickerElement @bind-Value="item.Color" OnChanged="@((value)=>OnChanged(value,item))"></CellColorPickerElement></td>
+                <td>@item.Value</td>
+            </tr>
+
+        }
+        </tbody>
+    </table>
+
+
+<div class="float-end">
+    <Button Color="ButtonColor.Secondary" @onclick="Cancel">Close</Button>
+    <Button Color="ButtonColor.Primary" @onclick="SaveItem">Save changes</Button>
+</div>
+
+@code {
+    private Modal modal = default!;
+
+    [Parameter] public ColumnTable Column { get; set; }
+    [Parameter] public IList<CellSettingValue> UniqueValues { get; set; }
+    [Parameter] public Action Cancel { get; set; }
+    [Parameter] public Action<IList<CellSettingValue>> Save { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    private void OnChanged(string color, CellSettingValue value)
+    {
+        value.Color = color;
+    }
+    private void SaveItem()
+    {
+        this.Save(UniqueValues);
+    }
+}

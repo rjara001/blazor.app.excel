@@ -1,0 +1,29 @@
+﻿<input type="color" class="form-control form-control-color" id="color" @bind="Value" title="Choose your color">
+
+@code {
+
+    private string _value;
+
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+
+        }
+        set
+        {
+            if (_value == value) return;
+            this._value = value;
+
+            ValueChanged.InvokeAsync(Value);
+            OnChanged.InvokeAsync(Value);
+        }
+    }
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnChanged { get; set; }
+}

@@ -15,7 +15,7 @@
 }
 else
 {
-    <TableView @ref="tableComponentRef" Table="@table" AllowedEdit="@AllowedEdit" OnEdit="@OnEdit" OnDelete="@OnDelete" OnSaveColumn="@OnSaveColumn"></TableView>
+    <TableView @ref="tableComponentRef" Table="@table" AllowedEdit="@AllowedEdit" OnEdit="@OnEdit" OnDelete="@OnDelete" OnSaveColumn="@OnSaveColumn" OnChangeCellValue="OnChangeCellValue"></TableView>
 }
 
 @code {
@@ -29,6 +29,7 @@ else
     [Parameter] public Action<RowCellExcel> OnEdit { get; set; } = default!;
     [Parameter] public Action<int> OnDelete { get; set; } = default!;
     [Parameter] public Action<int, string> OnSaveColumn { get; set; } = default!;
+    [Parameter] public EventCallback<string> OnChangeCellValue { get; set; } = default!;
 
     private string tabName = string.Empty;
 

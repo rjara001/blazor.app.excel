@@ -1,0 +1,51 @@
+﻿@using BlazorAppExcel.Share.Enums
+
+
+@if ((ExcelCellType)Type == ExcelCellType.Boolean || (ExcelCellType)Type == ExcelCellType.Unique)
+{
+    <div class="d-flex justify-content-center" @onmouseover="@(()=>isVisible = true)" @onmouseout="@(()=>isVisible = false)">
+        <div style="@(isVisible ? "visibility: visible;" : "visibility: hidden;")">
+
+                <a @onclick:preventDefault="true" href="#" @onclick="@(()=>ChangeValue(Index))"><i class="bi bi-caret-down-fill"></i></a>
+            
+        </div>
+        <div style="@BackColor">@Name</div>
+    </div>
+}
+else
+{
+    <div>@Name</div>
+}
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; }
+    [Parameter]
+    public int Index { get; set; }
+    [Parameter]
+    public int Type { get; set; }
+    [Parameter]
+    public string Color { get; set; }
+
+    private bool isVisible { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<int> OnChangeValue { get; set; }
+
+    private async void ChangeValue(int order)
+    {
+        await this.OnChangeValue.InvokeAsync(order);
+    }
+
+    private string BackColor
+    {
+        get
+        {
+            if (this.Color.Length>0)
+                return $"background-color:{Color}";
+
+            return string.Empty;
+        }
+    }
+}

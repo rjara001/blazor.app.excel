@@ -35,7 +35,7 @@
 </button>
 
 
-<TableDynamic table=@table @ref="tableDynamicComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true" OnSaveColumn="OnSaveColumn"></TableDynamic>
+<TableDynamic table=@table @ref="tableDynamicComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true" OnSaveColumn="OnSaveColumn" OnChangeCellValue="ChangeCellValue"></TableDynamic>
 
 <Modal @ref="_dialogTable" />
 <Modal @ref="_dialogSettings" />
@@ -63,6 +63,11 @@
 
             this.StateHasChanged();
         }
+    }
+
+    private async void ChangeCellValue(string value)
+    {
+        await this.excelService.SetUser(session.User, table);
     }
 
     private async void OnSaveColumn(int index, string value)

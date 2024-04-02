@@ -30,11 +30,11 @@
         set
         {
             if (_value == value) return;
-            Console.WriteLine("paso2:");
+
             this._value = value;
-            Console.WriteLine("paso3:");
+
             OnChildParameterChanged.InvokeAsync(value);
-            Console.WriteLine("paso4:");
+
         }
     }
 

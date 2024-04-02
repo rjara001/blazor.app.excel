@@ -32,10 +32,8 @@
 
     private IList<string> UniqueValues(string name)
     {
-        Util.LoadUniqueValues(TableExcel);
-
         if (TableExcel.UniqueValues.ContainsKey(name))
-            return TableExcel.UniqueValues[name];
+            return TableExcel.getUniqueValues(name).Select(_ => _.Value).ToList();
 
         return new List<string>();
     }

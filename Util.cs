@@ -2,6 +2,7 @@
 using BlazorAppExcel.Components;
 using BlazorAppExcel.Models;
 using BlazorAppExcel.Share.Enums;
+using BlazorAppExcel.Share.Models;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using NPOI.HSSF.UserModel;
@@ -109,45 +110,7 @@ public class Util
         return type == ".xls" ? new HSSFWorkbook(ms) : new XSSFWorkbook(ms);
     }
 
-    public static void LoadUniqueValues(TableExcel tableExcel)
-    {
-        for (int i = 0; i < tableExcel.Types.Count; i++)
-        {
-            var type = (ExcelCellType)tableExcel.Types[i];
-            if (type == ExcelCellType.Unique)
-                calculateUniqueValues(i, tableExcel);
-        }
-    }
-
-    private static void calculateUniqueValues(int index, TableExcel tableExcel)
-    {
-        var column = tableExcel.Columns[index];
-
-        try
-        {
-            if (tableExcel.UniqueValues.ContainsKey(column))
-                return;
-
-            var uniqueValues = tableExcel.Rows.Select(row => {
-                return row.Values[index];
-            }
-            ).ToList();
-
-            // Convert the result to a list000000000000
-            List<string> uniqueList = uniqueValues.ToList();
-
-            var list = uniqueList.Distinct().ToList();
-
-
-            tableExcel.UniqueValues.Add(column, list);
-        }
-        catch (Exception e)
-        {
-
-            throw;
-        }
-      
-    }
+  
 
     public static string ExtractNumberFromString(string input, ExcelCellType type)
     {

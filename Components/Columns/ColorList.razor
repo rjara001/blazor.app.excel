@@ -1,0 +1,17 @@
+﻿@using BlazorAppExcel.Share.Models
+
+<div class="d-flex justify-content-center">
+    @foreach (var item in CellSettingValues)
+    {
+        @if (item.Color.Length > 0)
+        {
+            <div style="@($"background-color:{item.Color};width:20px")">&nbsp;</div>
+        }
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public IList<CellSettingValue> CellSettingValues { get; set; }
+}

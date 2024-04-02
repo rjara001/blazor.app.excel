@@ -1,7 +1,9 @@
 ﻿@using BlazorAppExcel.Models
+@using BlazorAppExcel.Share.Enums
 @using BlazorAppExcel.Share.Models
 @using BlazorAppExcel.Components.Cells
 @using System.Linq
+@using BlazorAppExcel.Components.Grid
 
 @* @inject IDialogService DialogService *@
   <style>
@@ -69,11 +71,23 @@
                         </td>
 
                     }
-
-                    @foreach (string cell in @row.Values)
+                    @for (int indexRow = 0; indexRow < row.Values.Count; indexRow++)
                     {
-                        <td>@cell</td>
+                        var cell = row.Values[indexRow];
+          
+                        var typeCell = Table.Types[indexRow];
+                        var indexColumn = indexRow;
+                        var nameColumn = this.Table.Columns[indexColumn];
+                        var list = this.Table.getUniqueValues(nameColumn);
+                        var color = list.Where(_ => _.Value == cell).FirstOrDefault(new CellSettingValue());
+                        <td>
+                            <CellGridElement Color="@color.Color" Name="@cell" Type="@typeCell"  OnChangeValue="@(()=>ChangeCellValue(index, indexColumn))"></CellGridElement>
+             
+                        </td>
+                    
+         
                     }
+        
                 </tr>
 
             }
@@ -88,6 +102,7 @@
 @code {
     [Parameter] public Action<RowCellExcel> OnEdit { get; set; }
     [Parameter] public Action<int> OnDelete { get; set; }
+    [Parameter] public EventCallback<string> OnChangeCellValue { get; set; }
 
     [Parameter] public bool AllowedEdit { get; set; } = false;
 
@@ -122,6 +137,44 @@
 
     // private ConfirmDialog dialog;
     private Modal modal = default!;
+
+    private async void ChangeCellValue(int row, int column)
+    {
+        try
+        {
+            var KeyColumn = Table.Columns[column];
+
+            var list = this.Table.getUniqueValues(KeyColumn);
+
+            var valueCell = this.Table.Rows[row].Values[column];
+
+            var itemUniqueValue = list.FirstOrDefault(_ => _.Value == valueCell, new CellSettingValue());
+
+            int indexPos = list.IndexOf(itemUniqueValue); //list.IndexOf(valueCell);
+
+            var nextValue = valueCell;
+            if (indexPos + 1 < list.Count)
+                nextValue = list[indexPos+1].Value;
+            else
+            {
+                if (indexPos > 0)
+                    nextValue = list[indexPos-1].Value;
+            }
+
+            await this.OnChangeCellValue.InvokeAsync(nextValue);
+
+            this.Table.Rows[row].Values[column] = nextValue;
+
+          
+            await this.OnAfterRenderAsync(true);
+        }
+        catch (Exception e)
+        {
+
+            Console.WriteLine("paso");
+        }
+
+    }
 
     private async void OnChangeOrder(int order, int index)
     {
@@ -265,6 +318,7 @@
         {
             rows = SplitListIntoNSublists<RowExcel>(Table.Rows, 20);
             RowsSelected = Enumerable.Repeat(false, Table.Rows.Count).ToList();
+
 
             this.StateHasChanged();
         }

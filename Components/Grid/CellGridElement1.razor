@@ -1,0 +1,40 @@
+﻿@using BlazorAppExcel.Share.Enums
+
+
+@if (TypeCell == ExcelCellType.Boolean)
+{
+    <div class="d-flex justify-content-center">
+        <div>
+            @* <a @onclick:preventDefault="true" href="#" @onclick="@(()=>OnClickBoolean(2, Index))"><i class="bi bi-caret-down-fill"></i></a> *@
+            <a @onclick:preventDefault="true" href="#" @onclick="@(()=>ChangeValue(Index))"><i class="bi bi-caret-down-fill"></i></a>
+        </div>
+        <div>@Name</div>
+    </div>
+}
+else
+{
+    <div>@Name</div>
+}
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; }
+    [Parameter]
+    public int Index { get; set; }
+    [Parameter]
+    public ExcelCellType TypeCell { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnChangeValue { get; set; }
+
+    private async void ChangeValue(int order)
+    {
+        await this.OnChangeValue.InvokeAsync(order);
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+}
