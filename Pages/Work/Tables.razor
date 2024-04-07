@@ -1,6 +1,6 @@
 ﻿@page "/work/tables/{value}"
 @using BlazorAppExcel.Components
-@using BlazorAppExcel.Components.Atomic
+@using BlazorAppExcel.Components.Work
 @using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 
@@ -19,8 +19,7 @@
     }
 </style>
 
-
-<TextAndEditElement OnChangeValue="ChangeNameTable"></TextAndEditElement>
+<NameTableElement Table="@table"></NameTableElement>
 
 <div class="btn-group" role="group" aria-label="Basic example">
     <button type="button" class="btn btn-primary" @onclick="AddNew">
@@ -46,7 +45,6 @@
 
 <Modal @ref="_dialogTable" />
 <Modal @ref="_dialogSettings" />
-<ConfirmDialog @ref="dialog" />
 
 @code {
     private TableExcel table;                                                                                                
@@ -62,13 +60,6 @@
 
     private TableDynamic tableDynamic = default!;
 
-    private void ShowMessage(ToastType toastType, string message) => messages.Add(CreateToastMessage(toastType, message));
-    private ToastMessage CreateToastMessage(ToastType toastType, string message) => new ToastMessage
-        {
-            Type = toastType,
-            Message = message,
-        };
-
     private void DisableEditTitle()
     {
         
@@ -76,15 +67,7 @@
 
     private async void ChangeNameTable(string value)
     {
-        if (this.session.User.Tables.ContainsKey(value))
-        {
-            ShowMessage(ToastType.Warning, $"The name {value} already exists.");
-        }
-        else
-        {
-            await this.excelService.ChangeTableName(session.User, this.table, value);
-        }
-
+        await this.excelService.ChangeTableName(session.User, this.table, value);
     }
 
     private async void Delete(int index)
