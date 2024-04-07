@@ -1,5 +1,6 @@
 ﻿@page "/work/tables/{value}"
 @using BlazorAppExcel.Components
+@using BlazorAppExcel.Components.Atomic
 @using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 
@@ -9,40 +10,48 @@
 @using System.Data
 
 @inject ISessionSingletonService session;
-@* @inject IDialogService DialogService; *@
 @inject IExcelService excelService
 @inject IJSRuntime JSRuntime
+<style>
+    /* Custom CSS */
+    .inline {
+        display: inline-block; /* Set display property to inline-block */
+    }
+</style>
 
-<h3>App @Value</h3>
 
+<TextAndEditElement OnChangeValue="ChangeNameTable"></TextAndEditElement>
 
-<button class="btn btn-primary" @onclick="AddNew">
-    <i class="glyphicon glyphicon-plus"></i> Add
-</button>
-<button class="btn btn-primary" @onclick="Settings">
-    <i class="glyphicon glyphicon-plus"></i> Settings
-</button>
-<button class="btn btn-primary" @onclick="Download">
-    <i class="glyphicon glyphicon-plus"></i> Download
-</button>
+<div class="btn-group" role="group" aria-label="Basic example">
+    <button type="button" class="btn btn-primary" @onclick="AddNew">
+        <i class="bi bi-plus-circle-fill"></i> Add
+    </button>
+    <button type="button" class="btn btn-primary" @onclick="Settings">
+        <i class="bi bi-gear-fill"></i> Settings
+    </button>
+    <button type="button" class="btn btn-primary" @onclick="Download">
+        <i class="bi bi-cloud-download"></i> Download
+    </button>
 
-<button class="btn btn-primary" @onclick="CopyAllSelected">
-    <i class="glyphicon glyphicon-plus"></i> Copy
-</button>
+    <button type="button" class="btn btn-primary" @onclick="CopyAllSelected">
+        <i class="bi bi-copy"></i> Copy
+    </button>
 
-<button class="btn btn-primary" @onclick="DeleteAllSelected">
-    <i class="glyphicon glyphicon-plus"></i> Delete
-</button>
-
+    <button type="button" class="btn btn-primary" @onclick="DeleteAllSelected">
+        <i class="bi bi-trash"></i> Delete
+    </button>
+</div>
 
 <TableDynamic table=@table @ref="tableDynamicComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true" OnSaveColumn="OnSaveColumn" OnChangeCellValue="ChangeCellValue"></TableDynamic>
 
 <Modal @ref="_dialogTable" />
 <Modal @ref="_dialogSettings" />
+<ConfirmDialog @ref="dialog" />
+
 @code {
     private TableExcel table;                                                                                                
     private TableDynamic childComponentRef;
-
+    private ConfirmDialog dialog = default!;
     private TableDynamic tableDynamicComponentRef;
 
     [Parameter]
@@ -50,7 +59,33 @@
 
     Modal _dialogTable = default!;
     Modal _dialogSettings = default!;
+
     private TableDynamic tableDynamic = default!;
+
+    private void ShowMessage(ToastType toastType, string message) => messages.Add(CreateToastMessage(toastType, message));
+    private ToastMessage CreateToastMessage(ToastType toastType, string message) => new ToastMessage
+        {
+            Type = toastType,
+            Message = message,
+        };
+
+    private void DisableEditTitle()
+    {
+        
+    }
+
+    private async void ChangeNameTable(string value)
+    {
+        if (this.session.User.Tables.ContainsKey(value))
+        {
+            ShowMessage(ToastType.Warning, $"The name {value} already exists.");
+        }
+        else
+        {
+            await this.excelService.ChangeTableName(session.User, this.table, value);
+        }
+
+    }
 
     private async void Delete(int index)
     {

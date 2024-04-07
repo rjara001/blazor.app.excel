@@ -1,0 +1,50 @@
+﻿@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+
+@inject ISessionSingletonService session;
+@inject IExcelService excelService
+
+<div class="d-flex align-items-start">
+
+    @if (!IsTitleEditable)
+    {
+        <div @onclick="@(()=>IsTitleEditable = true)">
+            <h3>Table @Table.Name</h3>
+        </div>
+    }
+    else
+    {
+        <CellTextElement Value="@Table.Name" Name="Table Name" OnChildParameterChanged="SaveName" OnBlur="@(()=>this.IsTitleEditable = false)"></CellTextElement>
+    }
+</div>
+<ConfirmDialog @ref="dialog" />
+
+@code {
+
+    [Parameter]
+    public TableExcel Table { get; set; }
+    bool IsTitleEditable;
+    List<ToastMessage> messages = new List<ToastMessage>();
+    private ConfirmDialog dialog;
+
+    private void ShowMessage(ToastType toastType, string message) => messages.Add(CreateToastMessage(toastType, message));
+    private ToastMessage CreateToastMessage(ToastType toastType, string message) => new ToastMessage
+        {
+            Type = toastType,
+            Message = message,
+        };
+
+    private async void SaveName(string value)
+    {
+        if (this.session.User.Tables.ContainsKey(value))
+        {
+            ShowMessage(ToastType.Warning, $"The name {value} already exists.");
+        }
+        else
+        {
+            await this.excelService.ChangeTableName(session.User, this.Table, value);
+        }
+
+    }
+
+}

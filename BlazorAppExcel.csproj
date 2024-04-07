@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\atomic\FileUpload.razor" />
-    <Content Remove="Components\atomic\SimpleDialog.razor" />
+    <Content Remove="Components\Atomic\FileUpload.razor" />
+    <Content Remove="Components\Atomic\SimpleDialog.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,5 +28,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlazorAppExcel.Share\BlazorAppExcel.Share.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Atomic\" />
   </ItemGroup>
 </Project>

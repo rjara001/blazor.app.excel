@@ -17,14 +17,14 @@ namespace BlazorAppExcel.Models
         }
         public IDictionary<string, TableExcel> Tables { get; }
 
-        public void AddTable(TableExcel table)
-        {
-            if (this.Tables.ContainsKey(table.Name))
-            {
-                this.ChangeNameCounter(table, 0);
-            }
-           this.Tables.Add(table.Name, table);
-        }
+        //public void AddTable(TableExcel table)
+        //{
+        //    if (this.Tables.ContainsKey(table.Name))
+        //    {
+        //        this.ChangeNameCounter(table, 0);
+        //    }
+        //   this.Tables.Add(table.Name, table);
+        //}
 
         public void SetTables(IList<TableExcel> tables)
         {
@@ -34,27 +34,27 @@ namespace BlazorAppExcel.Models
             }
         }
 
-        private void ChangeNameCounter(TableExcel table, int count)
-        {
-            var newName = $"{table.Name}_{count}";
+        //private void ChangeNameCounter(TableExcel table, int count)
+        //{
+        //    var newName = $"{table.Name}_{count}";
 
-            if (this.Tables.ContainsKey(newName))
-            {
-                Console.WriteLine(newName);
-                this.ChangeNameCounter(table, count+1);
-            }
-            else
-                table.Name = newName;
+        //    if (this.Tables.ContainsKey(newName))
+        //    {
+        //        Console.WriteLine(newName);
+        //        this.ChangeNameCounter(table, count+1);
+        //    }
+        //    else
+        //        table.Name = newName;
 
-        }
+        //}
 
-        internal void AddTables(IList<TableExcel> tables)
-        {
-            foreach (var item in tables)
-            {
-                this.AddTable(item);
-            }
-        }
+        //internal void AddTables(IList<TableExcel> tables)
+        //{
+        //    foreach (var item in tables)
+        //    {
+        //        this.AddTable(item);
+        //    }
+        //}
 
         public IList<TableExcel> TablesToList()
         {

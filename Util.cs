@@ -46,6 +46,7 @@ public class Util
         {
             var rowSheet = sheet.GetRow(i);
             RowExcel rowExcel = new RowExcel();
+           
             dt.Rows.Add(rowExcel);
 
             int index = 0;
@@ -73,10 +74,21 @@ public class Util
 
         foreach (var item in sheets)
         {
-            ds.Add(getDataTableFromSheet(item, "user", e.File.Name));
+            var newTable = getDataTableFromSheet(item, "user", e.File.Name);
+  
+            ds.Add(newTable);
         }
 
         return ds;
+    }
+
+    public static string GetName(IDictionary<string, TableExcel> tables, TableExcel table, string newName)
+    {
+        string nameCode = table.GenerateCodeName(newName, false);
+
+        if (tables.ContainsKey(nameCode))
+            nameCode = table.GenerateCodeName(nameCode, true);
+        return nameCode;
     }
 
     private static async Task<IList<ISheet>> getDataSetFromStreamAsync(InputFileChangeEventArgs e)

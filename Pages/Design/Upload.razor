@@ -4,11 +4,11 @@
 @using NPOI.SS.UserModel
 @using NPOI.XSSF.UserModel
 @using System.Data
-@using BlazorAppExcel.Components.atomic
 
 @page "/design/upload"
 
 <h3>Import Excel</h3>
+
 @if (loading)
 {
     @* <ProgressCircular Color="Color.Default" Indeterminate="true" b/> *@
@@ -24,7 +24,7 @@ else
 {
     <Button OnClick="@clean"></Button>
 }
-<TabExcel ds=@ds></TabExcel>
+<TabExcel sheetsToSave=@ds></TabExcel>
 
 @code {
     bool loading = false;

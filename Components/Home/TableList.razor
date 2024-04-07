@@ -1,5 +1,4 @@
-﻿@using BlazorAppExcel.Components.atomic
-@using BlazorAppExcel.Interfaces
+﻿@using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 @using Blazored.LocalStorage
 @using Newtonsoft.Json
@@ -15,23 +14,25 @@
     </div>
 }
 
-@foreach (TableExcel table in tables)
+@foreach (var item in session.User.Tables)
 {
+    var table = item.Value;
     <div style="padding-top:20px">
-
+        
         <CardItem Table="@table" OnDelete="OnDelete"></CardItem>
     </div>
 }
 
 @code {
 
-    private IList<TableExcel> tables = new List<TableExcel>();
+    // private IList<TableExcel> tables = new List<TableExcel>();
 
     bool loading = false;
     private async void OnDelete(TableExcel table)
     {
-        tables.Remove(table);
-        await this.excelService.Delete("user", table.Id);
+       
+        // tables.Remove(table);
+        await this.excelService.Delete(session.User, table);
 
         this.StateHasChanged();
     }
@@ -49,7 +50,7 @@
 
         await this.session.SetUser(user);
 
-        tables = this.session.User.TablesToList();
+        // tables = this.session.User.TablesToList();
         loading = false;
     }
 }

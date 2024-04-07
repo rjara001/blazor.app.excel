@@ -60,22 +60,40 @@ namespace BlazorAppExcel.Services
 
         public async Task SetUser(User user, TableExcel table)
         {
-
-            user.Tables[table.Name] = table;
-
             await this._localStore.SetItemAsync<User>("__user", user);
 
             var httpClient = _httpClientFactory.CreateClient("MyNamedClient");
 
             var content = new StringContent(JsonConvert.SerializeObject(table), Encoding.UTF8, "application/json");
-            await httpClient.PostAsync("excel", content);
+            HttpResponseMessage response = await httpClient.PostAsync("excel", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Read the content of the response as a string
+                string responseData = await response.Content.ReadAsStringAsync();
+
+                // Print the response data
+                if (responseData != null){
+                    var obj = JsonConvert.DeserializeObject<TableExcel>(responseData);
+                    if (obj != null)
+                    {
+                        table.Id = obj.Id;
+                        // We store the id value
+                        await this._localStore.SetItemAsync<User>("__user", user);
+                    }
+      
+                }
+            }
         }
 
-        public async Task Delete(string idUser, string id)
+        public async Task Delete(User user, TableExcel table)
         {
+            user.Tables.Remove(table.Name);
+            await this._localStore.SetItemAsync<User>("__user", user);
+
             var httpClient = _httpClientFactory.CreateClient("MyNamedClient");
 
-            await httpClient.DeleteAsync($"excel/{idUser}/{id}");
+            await httpClient.DeleteAsync($"excel/{user.Name}/{table.Id}");
         }
 
         async Task<User> getUserFromLocalStorage(string nameUser)
@@ -89,5 +107,18 @@ namespace BlazorAppExcel.Services
 
             return null;
         }
+
+        public async Task ChangeTableName(User user, TableExcel table, string newName )
+        {
+            string nameCode = Util.GetName(user.Tables, table, newName);
+
+            user.Tables.Remove(table.Name);
+            table.Name = nameCode;
+            user.Tables.Add(nameCode, table);
+
+            await SetUser(user, table);
+        }
+
+      
     }
 }

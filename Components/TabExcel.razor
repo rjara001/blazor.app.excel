@@ -1,5 +1,4 @@
-﻿@using BlazorAppExcel.Components.atomic
-@using BlazorAppExcel.Interfaces
+﻿@using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 @using Blazored.LocalStorage
 @using System.Data
@@ -20,29 +19,38 @@
     }
 </style>
 
-@if (@ds.Count()>0)
+@if (sheetsToSave.Count()>0)
 {
-    <Button @onclick="@save" Variant="Variant.Filled"> Save</Button>
+    <div class="d-flex flex-column mb-3">
+        
+        <div class="p-2">
+            <Tabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
 
-    <Tabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
-  
-        @for (var index = 0; index < ds.Count; index++)
-        {
-            var tabName = $"tab-{@index.ToString()}";
-            var tabNameDisplay = ds[index].Name;
-            var dsTable = ds[index];
-            this.table = dsTable;
+                @for (var index = 0; index < sheetsToSave.Count; index++)
+                {
+                    var tabName = $"tab-{@index.ToString()}";
+                    var tabNameDisplay = sheetsToSave[index].Name;
+                    var dsTable = sheetsToSave[index];
+                    this.table = dsTable;
 
-            <Tab Text="@tabNameDisplay">
-                <Content>
-                    <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
-                </Content>
-            </Tab>
-        }
-    </Tabs>
+                    <Tab Title="@tabNameDisplay">
+                        <Content>
+                            <TableDynamic table=@dsTable @ref="childComponentRef"></TableDynamic>
+                        </Content>
+                    </Tab>
+                }
+            </Tabs>
+        </div>
+        <div class="p-2"><Button @onclick="@save" Color="ButtonColor.Primary" Size="Size.Small">Save Table</Button></div>
+    </div>
+
+    
+
+    
 }
 
-
+<Toasts class="p-3" Messages="messages" Delay="6000" Placement="ToastsPlacement.TopRight" />
+<ConfirmDialog @ref="dialog" />
 
 @code {
     private TableDynamic childComponentRef;
@@ -52,7 +60,7 @@
 
 
     [Parameter]
-    public IList<TableExcel> ds { get; set; } = new List<TableExcel>();
+    public IList<TableExcel> sheetsToSave { get; set; } = new List<TableExcel>();
 
     string nameFilter = string.Empty;
 
@@ -72,42 +80,94 @@
         }
     }
 
-    private async void save() {
+    private async Task<bool> UserWantRewriteIt(string name)
+    {
+        var confirmation = await dialog.ShowAsync(
+          title: $"The table '{name}' you are saving already exists.",
+          message1: $"And you are about to overwrite it",
+          message2: "Do you want to proceed?");
 
-        for (var index = 0; index < ds.Count; index++)
-        {
-            TableExcel _table = ds[index];
-            await saveTable(_table);
-        }
+        return confirmation;
     }
 
+    private async void save() {
+        // TODO: Validate when we have multiple sheets
+        try
+        {
+            for (var index = 0; index < sheetsToSave.Count; index++)
+            {
+                TableExcel _table = sheetsToSave[index];
+                if (this.userServices.User.Tables.ContainsKey(_table.Name))
+                {
+                    ShowMessage(ToastType.Warning, $"It was not possible to save it because the table '{_table.Name}' already exists.");
+                    // if (await this.UserWantRewriteIt(_table.Name))
+                    // {
+                    //     await updateTable(_table);
+                    // }
+                }
+                else
+                    await saveTable(_table);
+
+            }
+        }
+        catch (Exception ex)
+        {
+            
+            throw ex;
+        }
+
+    }
+    List<ToastMessage> messages = new List<ToastMessage>();
+
+    private void ShowMessage(ToastType toastType, string message) => messages.Add(CreateToastMessage(toastType, message));
+
+    private ToastMessage CreateToastMessage(ToastType toastType, string message) => new ToastMessage
+        {
+            Type = toastType,
+            Message = message,
+        };
+    // private async Task updateTable(TableExcel table)
+    // {
+    //     try
+    //     {
+    //         userServices.User.Tables.Remove(table.Name);
+    //         table.Name = nameCode;
+    //         user.Tables.Add(nameCode, table);
+
+    //         await this.excelService.SetUser(userServices.User, table);
+
+    //         ShowMessage(ToastType.Primary, "Data overrided succesfully");
+
+    //         this.StateHasChanged();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine("pas");
+    //         throw;
+    //     }
+
+
+
+    // }
     private async Task saveTable(TableExcel table)
     {
-
-        // await this.excelService.SetUser(userServices.User, table);
-
-        // this.userServices.User.AddTable(table);
-  
-        // var options = new DialogOptions { CloseOnEscapeKey = true };
-
-        // var parameters = new MudBlazor.DialogParameters<SimpleDialog>();
-        // parameters.Add(x => x.Title, "Save Succesfully");
-
-        // DialogService.Show<SimpleDialog>("Save Succesfully", options);
-
-
-        var confirmation = await dialog.ShowAsync(
-                    title: "Are you sure you want to delete this?",
-                    message1: "This will delete the record. Once deleted can not be rolled back.",
-                    message2: "Do you want to proceed?");
-
-        if (confirmation)
+        try
         {
-            // do something
+            userServices.User.Tables.Add(table.Name, table);
+            await this.excelService.SetUser(userServices.User, table);
+            userServices.User.Tables[table.Name].Id = table.Id;
+
+            ShowMessage(ToastType.Primary, "Data has been saved succesfully");
+
+            this.StateHasChanged();
         }
-        else
+        catch (Exception ex)
         {
-            // do something
+            Console.WriteLine("pas");
+            throw;
         }
+
+ 
+
     }
 }

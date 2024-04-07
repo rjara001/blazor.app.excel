@@ -1,0 +1,110 @@
+﻿@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+@inject NavigationManager NavigationManager;
+@inject ISessionSingletonService UserSession;
+@inject IExcelService excelService;
+
+<Card>
+    <CardBody>
+       
+        <div class="d-flex justify-content-between">
+            <CardTitle>
+                @if (!IsTitleEditable)
+                {
+                    <div onclick="@EnableEditTitle">
+                        @Table.Name
+                    </div>
+                }
+                else
+                {
+                    @* <CellTextElement @bind-Value="Table.Name" Label="Tab Name" Variant="Variant.Text" OnBlur="DisableEditTitle"></CellTextElement> *@
+                    <CellTextElement Value="@Table.Name" Name="Table Name" OnChildParameterChanged="SaveName" OnBlur="DisableEditTitle"></CellTextElement>
+                }
+            </CardTitle>
+            <CardSubTitle Class="mb-2 text-muted">@getDateCreationValue()</CardSubTitle>
+        </div>
+        
+        <CardSubTitle Class="mb-2 text-muted">@getFileNameValue()</CardSubTitle>
+           
+        <a @onclick:preventDefault="true" @onclick="Edit" href="#" class="text-decoration-none">Edit</a>
+        <a @onclick:preventDefault="true" @onclick="Delete" href="#" class="text-decoration-none">Delete</a>
+    </CardBody>
+</Card>
+<ConfirmDialog @ref="dialog" />
+@code {
+
+    [Parameter] public TableExcel Table { get; set; }
+    [Parameter] public Action<TableExcel> OnDelete { get; set; }
+    bool IsTitleEditable = false;
+
+    private ConfirmDialog dialog;
+
+    private async void SaveName(string value)
+    {
+        // This validation is because further head the name is setted to value and automatically is triggerd the OnChildParameterChanged event again generation a infite loop
+        if (this.Table.Name == value)
+            return;
+
+        var user = UserSession.User;
+        var _table = this.Table;
+        await this.excelService.ChangeTableName(user, _table, value);
+    }
+
+    private async void DisableEditTitle()
+    {
+
+        IsTitleEditable = false;
+    }
+
+    private void EnableEditTitle()
+    {
+        IsTitleEditable = !IsTitleEditable;
+    }
+    private async Task<bool> UserWantDeleteTable(string name)
+    {
+        var confirmation = await dialog.ShowAsync(
+                                  title: $"Deleting table '{name}'..",
+                                  message1: $"You are about to delete the table",
+                                  message2: "Do you want to proceed?");
+
+        return confirmation;
+    }
+
+    private async void Delete()
+    {
+        try
+        {
+            if (await UserWantDeleteTable(Table.Name))
+                OnDelete(Table);
+        }
+        catch (Exception e)
+        {
+            
+            throw;
+        }
+
+
+    }
+
+    public void Edit()
+    {
+        this.UserSession.SetTableActive(Table);
+
+        NavigationManager.NavigateTo($"work/tables/{Table.Name}");
+    }
+
+    private string getFileNameValue()
+    {
+        if (Table.FileName == null)
+            return "(value no register)";
+
+        return Table.FileName;
+    }
+
+    private string getDateCreationValue()
+    {
+        if (Table.DateCreation == null)
+            return Table.Name;
+        return Table.DateCreation.ToLongDateString();
+    }
+}
