@@ -32,8 +32,10 @@
 
     private IList<string> UniqueValues(string name)
     {
-        if (TableExcel.UniqueValues.ContainsKey(name))
+        if (TableExcel.UniqueValues.ContainsKey(name)){
+            TableExcel.UpdateUniqueValues(name);
             return TableExcel.getUniqueValues(name).Select(_ => _.Value).ToList();
+        }
 
         return new List<string>();
     }

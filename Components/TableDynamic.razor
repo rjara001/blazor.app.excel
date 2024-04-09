@@ -55,4 +55,9 @@ else
         tableComponentRef.DeleteRowsSelected();
         this.StateHasChanged();
     }
+
+    public async Task Refresh()
+    {
+        await this.tableComponentRef.Refresh();
+    }
 }

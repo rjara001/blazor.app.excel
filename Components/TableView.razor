@@ -44,8 +44,9 @@
        
         @if (Table != null && rows.Count()>0)
         {
+            var currentRow = rows[IndexPag - 1];
 
-            @foreach (var (row, index) in rows[IndexPag - 1].Select((item, index) => (item, index)))
+            @foreach (var (row, index) in currentRow.Select((item, index) => (item, index)))
             {
                 IList<string> columns = Table.Columns;
 
@@ -79,6 +80,9 @@
                         var indexColumn = indexRow;
                         var nameColumn = this.Table.Columns[indexColumn];
                         var list = this.Table.getUniqueValues(nameColumn);
+
+                        string value1 = cell.ToString();
+
                         var color = list.Where(_ => _.Value == cell).FirstOrDefault(new CellSettingValue());
                         <td>
                             <CellGridElement Color="@color.Color" Name="@cell" Type="@typeCell"  OnChangeValue="@(()=>ChangeCellValue(index, indexColumn))"></CellGridElement>
@@ -165,7 +169,7 @@
 
             this.Table.Rows[row].Values[column] = nextValue;
 
-          
+
             await this.OnAfterRenderAsync(true);
         }
         catch (Exception e)
@@ -192,7 +196,7 @@
         }
         catch (Exception e)
         {
-            
+
             throw;
         }
 
@@ -256,7 +260,7 @@
     {
         try
         {
- 
+
             for (int i = this.RowsSelected.Count - 1; i >= 0; i--)
             {
                 if (this.RowsSelected[i])
@@ -311,6 +315,10 @@
 
         return sublists;
     }
+    public async Task Refresh()
+    {
+        await this.OnAfterRenderAsync(true);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -325,6 +333,7 @@
     }
     private async Task OnPageChangedAsync(int newPageNumber)
     {
+        Console.WriteLine($"number:{newPageNumber}");
         await Task.Run(() => { IndexPag = newPageNumber; });
 
 

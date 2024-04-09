@@ -4,11 +4,10 @@
 <div class="form-floating mb-3">
 
     <AutoComplete class="form-control" TItem="KeyValuePair<int,string>" Label="@Name"
-                  @bind-Value="Value" 
-                    DataProvider="Search"
-                  Placeholder="@Name"
-                     PropertyName="Value"
-                     AdornmentColor="Color.Primary" />
+            @bind-Value="Value" 
+            DataProvider="Search"
+            Placeholder="@Name"
+            PropertyName="Value"/>
 
 </div>
 
@@ -35,10 +34,20 @@
                                                .ToDictionary(item => item.Index, item => item.Value);
 
 
+
+        if (request.Filter.Value != null && request.Filter.Value.Length > 0)
+        {
+            bool itemExists = values.Count(_ => _.Value.ToLower().IndexOf(request.Filter.Value.ToLower()) >= 0) > 0;
+            if (!itemExists)
+            {
+                this.Value = request.Filter.Value;
+                values.Add(values.Count(), request.Filter.Value);
+            }
+        }
+        
+
         return await Task.FromResult(request.ApplyTo(values));
-        //return Values.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase)).Select(word => new AutoCompleteDataProviderResult<string>() { Data = customers, TotalCount = customers.Count() });
-        // return await Task.FromResult(request.ApplyTo(list));
-        //return await Task.FromResult(new AutoCompleteDataProviderResult<string> { Data = list, TotalCount = list.Count() });
+
     }
    
     private string _value;

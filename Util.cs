@@ -41,6 +41,8 @@ public class Util
             if (cell?.ToString().Length > 0)
                 dt.setColumns(cell.ToString());
         }
+        // fix the size
+        numColumns = dt.Columns.Count;
 
         for (int i = sheet.FirstRowNum + 1; i <= sheet.LastRowNum; i++)
         {
