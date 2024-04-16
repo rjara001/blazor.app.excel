@@ -12,6 +12,6 @@ namespace BlazorAppExcel.Interfaces
 
         Task Delete(User user, TableExcel Table);
 
-        Task ChangeTableName(User user, TableExcel table, string newName);
+        Task<string> ChangeTableName(User user, TableExcel table, string newName);
     }
 }

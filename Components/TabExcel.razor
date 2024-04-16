@@ -41,7 +41,16 @@
                 }
             </Tabs>
         </div>
-        <div class="p-2"><Button @onclick="@save" Color="ButtonColor.Primary" Size="Size.Small">Save Table</Button></div>
+        <div class="p-2">
+            @if (sheetsToSave.Count(_=>_.Upload.IsTablesMatched)>0)
+            {
+                <Button @onclick="@save" Color="ButtonColor.Primary" Size="Size.Small">Add Rows</Button>
+            }
+            else
+            {
+                <Button @onclick="@save" Color="ButtonColor.Primary" Size="Size.Small">Create Table</Button>
+            }
+        </div>
     </div>
 
     

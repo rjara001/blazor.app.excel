@@ -1,11 +1,16 @@
 ﻿@using BlazorAppExcel.Components
+@using BlazorAppExcel.Components.Upload
+@using BlazorAppExcel.Interfaces
 @using BlazorAppExcel.Models
 @using NPOI.HSSF.UserModel
 @using NPOI.SS.UserModel
 @using NPOI.XSSF.UserModel
 @using System.Data
 
-@page "/design/upload"
+@page "/design/upload/"
+@inject NavigationManager NavigationManager;
+@inject ISessionSingletonService session;
+
 
 <h3>Import Excel</h3>
 
@@ -18,18 +23,28 @@
 @if (ds.Count()==0)
 {
     <InputFile OnChange="(e)=> ImportFileExcel(e)"></InputFile>
-
 }
 else
 {
     <Button OnClick="@clean"></Button>
 }
-<TabExcel sheetsToSave=@ds></TabExcel>
+@* <TabExcel sheetsToSave=@ds></TabExcel> *@
+
+@foreach (TableExcel item in ds)
+{
+    <CardExcel Table="@item" OnAdd="CardAdded" OnSave="CardSaved" OnReplace="CardReplaced"></CardExcel>
+}
 
 @code {
     bool loading = false;
 
+    // [Parameter]
+    // public string KeyTable { get; set; } = default!;
+    public TableExcel Table { get; set; } = default!;
+
     IList<TableExcel> ds = new List<TableExcel>();
+
+    private IList<string> TablesSaved = new List<string>();
 
     void clean()
     {
@@ -40,9 +55,51 @@ else
     {
         loading = true;
 
-        ds = await Util.getDataSetAsync(e);
+        ds = await Util.getDataSetAsync(e ,this.session.User.TablesToList());
         loading = false;
 
         this.StateHasChanged();
+    }
+
+    protected void CardAdded(TableExcel table)
+    {
+        var item = ds.FirstOrDefault(_ => _.Name == table.Name, new TableExcel());
+        TablesSaved.Add(item.Name);
+
+        if (TablesSaved.Count == ds.Count())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected void CardSaved(TableExcel table)
+    {
+        var item = ds.FirstOrDefault(_ => _.Name == table.Name, new TableExcel());
+        TablesSaved.Add(item.Name);
+
+        if (TablesSaved.Count == ds.Count())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected void CardReplaced(TableExcel table)
+    {
+        var item = ds.FirstOrDefault(_ => _.Name == table.Name, new TableExcel());
+        TablesSaved.Add(item.Name);
+
+        if (TablesSaved.Count == ds.Count())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        // if (this.KeyTable!=null)
+        // {
+        //     Table = this.session.User.Tables[this.KeyTable];
+        // }
+        return base.OnInitializedAsync();
     }
 }

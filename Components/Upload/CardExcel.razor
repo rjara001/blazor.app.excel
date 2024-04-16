@@ -1,0 +1,179 @@
+﻿@using BlazorAppExcel.Components.Atomic
+@using BlazorAppExcel.Components.Bases
+@using BlazorAppExcel.Interfaces
+@using BlazorAppExcel.Models
+
+@inherits Base
+
+@inject ISessionSingletonService userServices;
+@inject IExcelService excelService
+
+<div class="card">
+    <div class="card-header">
+        File Information
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Uploaded File</h5>
+        <p class="card-text"><i class="fas fa-file-alt"></i> Name: @Table.Name</p>
+        <p class="card-text"><i class="fas fa-list"></i> Rows: @Table.Rows.Count()</p>
+        <p class="card-text"><i class="fas fa-columns"></i> Columns: @Table.Columns.Count()</p>
+
+        @if (Table.Upload.IsTablesMatched)
+        {
+            <p class="card-text"><i class="fas fa-link"></i> Matching File: @Table.Upload.TableMached</p>
+        }
+        @if (Table.Upload.IsTablesMatched)
+        {
+            <div class="alert alert-primary" role="alert">
+                We've detected that a table with the same columns already exists. What would you like to do?
+            </div>
+        }
+
+        <div class="btn-group" role="group">
+           
+            <ButtonProgress Class="btn btn-primary" OnClick="confirmSave" InProgress="this.InProgress"><i class="bi bi-cloud-arrow-up"></i> Save</ButtonProgress>
+            @if (Table.Upload.IsTablesMatched)
+             {    
+                <ButtonProgress Class="btn btn-success" OnClick="confirmAdd" InProgress="this.InProgress"><i class="bi bi-plus-circle"></i> Add</ButtonProgress>
+                <ButtonProgress Class="btn btn-warning" OnClick="confirmReplace" InProgress="this.InProgress"><i class="bi bi-arrow-repeat"></i> Replace</ButtonProgress>
+             }
+ 
+        </div>
+   
+
+    </div>
+</div>
+<ConfirmDialog @ref="Dialog" />
+
+@code {
+    protected ConfirmDialog Dialog = default!;
+
+    [Parameter]
+    public TableExcel Table { get; set; }
+
+    [Parameter]
+    public EventCallback<TableExcel> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback<TableExcel> OnAdd { get; set; }
+
+    [Parameter]
+    public EventCallback<TableExcel> OnReplace { get; set; }
+
+    public async void confirmReplace()
+    {
+        var confirmation = await Dialog.ShowAsync(
+          title: "You are about to replace the old rows over the new rows of the new Table",
+          message1: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            this.StartProcess();
+            await _replace();
+            await this.OnAdd.InvokeAsync(this.Table);
+            this.EndProcess();
+        }
+    }
+
+      public async void confirmSave()
+    {
+        var confirmation = await Dialog.ShowAsync(
+                    title: "You are about to save this new Table",
+                    message1: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            this.StartProcess();
+
+            await _save();
+            await this.OnSave.InvokeAsync(this.Table);
+
+            this.EndProcess();
+        }
+    }
+
+    private async Task _save()
+    {
+
+        await saveTable(Table);
+
+    }
+
+    private async Task _replace()
+    {
+        var _table = userServices.User.Tables[Table.Upload.TableMached];
+
+        _table.Rows.Clear();
+
+        foreach (var row in Table.Rows)
+        {
+            _table.Rows.Add(row);
+        }
+
+        await this.excelService.SetUser(userServices.User, _table);
+
+        ShowMessage(ToastType.Primary, "Data has been replaced succesfully");
+
+        await this.OnReplace.InvokeAsync(this.Table);
+
+    }
+
+    public async void confirmAdd()
+    {
+        var confirmation = await Dialog.ShowAsync(
+            title: "You are about to add the new rows from new Table",
+            message1: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            this.StartProcess();
+            await _add();
+            await this.OnAdd.InvokeAsync(this.Table);
+            this.EndProcess();
+        }
+    }
+
+    private async Task _add()
+    {
+        var _table = userServices.User.Tables[Table.Upload.TableMached];
+
+        foreach (var row in Table.Rows)
+        {
+            _table.Rows.Add(row);
+        }
+
+        await this.excelService.SetUser(userServices.User, _table);
+
+        ShowMessage(ToastType.Primary, "Data has been added succesfully");
+    }
+
+    public void details() {}
+
+    private async Task saveTable(TableExcel table)
+    {
+        try
+        {
+
+            string nameCode = Util.GetName(userServices.User.Tables, table, Table.Name);
+
+            table.Name = nameCode;
+
+            userServices.User.Tables.Add(table.Name, table);
+            await this.excelService.SetUser(userServices.User, table);
+            userServices.User.Tables[table.Name].Id = table.Id;
+
+            ShowMessage(ToastType.Primary, "Data has been saved succesfully");
+
+
+            // this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("pas");
+            throw;
+        }
+
+
+
+    }
+}

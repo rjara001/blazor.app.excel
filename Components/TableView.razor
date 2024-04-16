@@ -22,7 +22,7 @@
             }
             @for (int index = 0; index<Table.Columns.Count();index++)
             {
-                var column = Table.Columns[index];
+                var column = Table.Columns[index].Text;
                 int indexColumn = index;
 
                 if (ColumnOrder!=null)
@@ -48,7 +48,7 @@
 
             @foreach (var (row, index) in currentRow.Select((item, index) => (item, index)))
             {
-                IList<string> columns = Table.Columns;
+                IList<string> columns = Table.Columns.Select(_=>_.Text).ToList();
 
                 <tr>
 
@@ -78,7 +78,7 @@
           
                         var typeCell = Table.Types[indexRow];
                         var indexColumn = indexRow;
-                        var nameColumn = this.Table.Columns[indexColumn];
+                        var nameColumn = this.Table.Columns[indexColumn].Key;
                         var list = this.Table.getUniqueValues(nameColumn);
 
                         string value1 = cell.ToString();
@@ -146,7 +146,7 @@
     {
         try
         {
-            var KeyColumn = Table.Columns[column];
+            var KeyColumn = Table.Columns[column].Key;
 
             var list = this.Table.getUniqueValues(KeyColumn);
 

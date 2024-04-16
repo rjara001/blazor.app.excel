@@ -41,9 +41,9 @@
             @if (TableSelected != null)
             {
 
-                @for (int index = 0; index < this.TableSelected.GetColumnTables.Count; index++)
+                @for (int index = 0; index < this.TableSelected.Columns.Count; index++)
                 {
-                    ColumnTable item = this.TableSelected.GetColumnTables[index];
+                    Column item = this.TableSelected.Columns[index];
                     var indexItem = index;
                     <tr>
                         <td scope="row">
@@ -59,7 +59,7 @@
                                 </a>
                             }
                         </td>
-                        <td><ColorList CellSettingValues="@UniqueValues(item.Name)"></ColorList></td>
+                        <td><ColorList CellSettingValues="@UniqueValues(item.Key)"></ColorList></td>
                         <td>
                             @if (this._editableNameColumn == item.Key)
                             {
@@ -140,7 +140,7 @@
     private string IdColumn { get; set; }
 
 
-    private async void ShowColorDialog(int index, ColumnTable item)
+    private async void ShowColorDialog(int index, Column item)
     {
         var list = this.TableSelected.getUniqueValues(item.Name);
 
@@ -150,22 +150,21 @@
         parameters.Add("Cancel", (Action)(async () => await _dialog.HideAsync()));
         parameters.Add("Save", (Action<IList<CellSettingValue>>)((row) => this.OnSaveColorSetting(row, item)));
 
-        await _dialog.ShowAsync<EditColorSettingDialog>(title: $"Editing Colors {item.Name}", parameters: parameters);
+        await _dialog.ShowAsync<EditColorSettingDialog>(title: $"Editing Colors {item.Text}", parameters: parameters);
     }
 
-    private async void UpdateChildParameter(string value, ColumnTable item)
+    private async void UpdateChildParameter(string value, Column item)
     {
-        Console.WriteLine("value:" + value);
+      
+        int index = this.TableSelected.Columns.IndexOf(item);
 
-        int index = this.TableSelected.Columns.IndexOf(item.Name);
-
-        this.TableSelected.Columns[index] = value;
+        this.TableSelected.Columns[index].Text = value;
 
         await excel.SetUser(session.User, TableSelected);
 
     }
 
-    private async void OnSaveColorSetting(IList<CellSettingValue> values, ColumnTable item)
+    private async void OnSaveColorSetting(IList<CellSettingValue> values, Column item)
     {
         TableSelected.setUniqueValues(item.Name, values);
 
@@ -174,7 +173,7 @@
         await _dialog.HideAsync();
     }
 
-    private async void OnDeleteItem(ColumnTable item, int index)
+    private async void OnDeleteItem(Column item, int index)
     {
     
             var confirmation = await dialog.ShowAsync(
@@ -191,10 +190,10 @@
 
     }
 
-    private async void DeleteColumn(ColumnTable item, int index)
+    private async void DeleteColumn(Column item, int index)
     {
         TableSelected.Types.RemoveAt(index);
-        TableSelected.Columns.Remove(item.Key);
+        TableSelected.Columns.Remove(item);
 
         foreach (RowExcel row in TableSelected.Rows)
         {
@@ -215,17 +214,17 @@
         await excel.SetUser(session.User, TableSelected);
     }
 
-    private async Task OnSaveChanges(string value, ColumnTable item, int index)
+    private async Task OnSaveChanges(string value, Column item, int index)
     {
 
-        TableSelected.Columns[index] = value;
+        TableSelected.Columns[index].Text = value;
 
         TableSelected.Types[index] = item.IdType;
 
         await excel.SetUser(session.User, TableSelected);
     }
 
-    private async void UpdateType(int index, string newValue, ColumnTable item)
+    private async void UpdateType(int index, string newValue, Column item)
     {
  
         item.IdType = Convert.ToInt16(newValue);
@@ -259,7 +258,7 @@
     async void AddItem()
     {
 
-        this.TableSelected.Columns.Add("new column");
+        this.TableSelected.Columns.Add(new Column("new column"));
         this.TableSelected.Types.Add((int)Share.Enums.ExcelCellType.String);
 
         foreach (RowExcel row in TableSelected.Rows)

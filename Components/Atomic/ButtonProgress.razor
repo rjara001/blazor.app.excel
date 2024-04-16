@@ -1,0 +1,24 @@
+﻿<button type="button" class="@Class" @onclick="OnClick" disabled="@this.InProgress">
+    @if (this.InProgress)
+    {
+        <Spinner Type="SpinnerType.Dots" Class="me-3" Color="SpinnerColor.Primary" />
+    }
+    else
+    {
+        @ChildContent
+     
+    }
+</button>
+@code {
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public bool InProgress { get; set; }
+
+    [Parameter]
+    public Action OnClick { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

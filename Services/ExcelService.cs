@@ -108,15 +108,17 @@ namespace BlazorAppExcel.Services
             return null;
         }
 
-        public async Task ChangeTableName(User user, TableExcel table, string newName )
+        public async Task<string> ChangeTableName(User user, TableExcel table, string newName )
         {
             string nameCode = Util.GetName(user.Tables, table, newName);
 
             user.Tables.Remove(table.Name);
             table.Name = nameCode;
-            user.Tables.Add(nameCode, table);
+            user.Tables.Add(table.Name, table);
 
             await SetUser(user, table);
+
+            return nameCode;
         }
 
       

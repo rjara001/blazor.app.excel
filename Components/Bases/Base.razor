@@ -1,0 +1,22 @@
+﻿@code {
+    List<ToastMessage> messages = new List<ToastMessage>();
+    protected void ShowMessage(ToastType toastType, string message) => messages.Add(CreateToastMessage(toastType, message));
+    private ToastMessage CreateToastMessage(ToastType toastType, string message) => new ToastMessage
+        {
+            Type = toastType,
+            Message = message,
+        };
+
+    protected bool InProgress { get; set; } = false;
+
+    protected void StartProcess()
+    {
+        this.InProgress = true;
+        this.StateHasChanged();
+    }
+
+    protected void EndProcess()
+    {
+        this.InProgress = false;
+    }
+}

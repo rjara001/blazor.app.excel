@@ -12,6 +12,8 @@
 @inject ISessionSingletonService session;
 @inject IExcelService excelService
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager;
+
 <style>
     /* Custom CSS */
     .inline {
@@ -39,6 +41,10 @@
     <button type="button" class="btn btn-primary" @onclick="DeleteAllSelected">
         <i class="bi bi-trash"></i> Delete
     </button>
+
+    <button type="button" class="btn btn-primary" @onclick="AddingUpLoad">
+        <i class="bi bi-cloud-plus"></i> Adding Upload
+    </button>
 </div>
 
 <TableDynamic table=@table @ref="tableDynamicComponentRef" OnEdit="Edit" OnDelete="Delete" AllowedEdit="true" OnSaveColumn="OnSaveColumn" OnChangeCellValue="ChangeCellValue"></TableDynamic>
@@ -60,9 +66,9 @@
 
     private TableDynamic tableDynamic = default!;
 
-    private void DisableEditTitle()
+    private void AddingUpLoad()
     {
-
+        NavigationManager.NavigateTo($"design/upload/{table.Name}");
     }
 
     private async void ChangeNameTable(string value)
@@ -91,7 +97,7 @@
     private async void OnSaveColumn(int index, string value)
     {
 
-        this.table.Columns[index] = value;
+        this.table.Columns[index].Key = value;
 
         await this.excelService.SetUser(session.User, this.table);
     }
@@ -111,7 +117,7 @@
 
     private async void AddNew()
     {
-        IList<string> columns = table.Columns;
+        IList<string> columns = table.Columns.Select(_=>_.Text).ToList();
 
         RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Types, table.Rows.Count()+1);
 

@@ -30,7 +30,7 @@
 @code {
     private Modal modal = default!;
 
-    [Parameter] public ColumnTable Column { get; set; }
+    [Parameter] public Column Column { get; set; }
     [Parameter] public IList<CellSettingValue> UniqueValues { get; set; }
     [Parameter] public Action Cancel { get; set; }
     [Parameter] public Action<IList<CellSettingValue>> Save { get; set; }

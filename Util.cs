@@ -67,7 +67,7 @@ public class Util
         return dt;
     }
 
-    public static async Task<IList<TableExcel>> getDataSetAsync(InputFileChangeEventArgs e)
+    public static async Task<IList<TableExcel>> getDataSetAsync(InputFileChangeEventArgs e, IList<TableExcel> tables)
     {
         IList<ISheet> sheets = await getDataSetFromStreamAsync(e);
 
@@ -77,19 +77,66 @@ public class Util
         foreach (var item in sheets)
         {
             var newTable = getDataTableFromSheet(item, "user", e.File.Name);
-  
+
+            tables = Util.CheckTablesMatchedAt(newTable, tables);
+   
             ds.Add(newTable);
         }
 
         return ds;
     }
+    private static TableExcel MergesTable(TableExcel newTable, TableExcel table)
+    {
+        foreach (var row in table.Rows)
+        {
+            newTable.Rows.Add(row);
+        }
+
+        return newTable;
+    }
+    private static IList<TableExcel> CheckTablesMatchedAt(TableExcel newTable, IList<TableExcel> tables)
+    {
+        int index = 0;
+        Column column = null;
+        TableExcel table = null;
+
+        while (index < tables.Count() && column == null)
+        {
+
+            table = tables[index];
+
+            column = table.Columns.FirstOrDefault(item =>
+                                                          newTable.Columns.Any(newItem =>
+                                                              string.Equals(newItem.Key, item.Key, StringComparison.OrdinalIgnoreCase)));
+            index++;
+        }
+
+        if (column == null)
+        {
+            newTable.Upload.IsTablesMatched = false;
+        }
+        else
+        {
+            newTable.Upload.IsTablesMatched = true;
+
+            newTable.Upload.TableMached = table.Name;
+        }
+
+        return tables;
+
+
+    }
 
     public static string GetName(IDictionary<string, TableExcel> tables, TableExcel table, string newName)
     {
-        string nameCode = table.GenerateCodeName(newName, false);
-
-        if (tables.ContainsKey(nameCode))
+        string nameCode = table.GenerateCodeName(newName, true);
+        int index = 0;
+        while (tables.ContainsKey(nameCode) && index<20)
+        {
             nameCode = table.GenerateCodeName(nameCode, true);
+            index++;    
+        }
+           
         return nameCode;
     }
 
@@ -228,7 +275,7 @@ public class Util
             {
 
                 ICell cell = row.CreateCell(i);
-                var cellTtext = table.Columns[i];
+                var cellTtext = table.Columns[i].Key;
                 cell.SetCellValue(cH.CreateRichTextString(cellTtext));
             }
 

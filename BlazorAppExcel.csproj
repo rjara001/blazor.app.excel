@@ -29,8 +29,4 @@
   <ItemGroup>
     <ProjectReference Include="..\BlazorAppExcel.Share\BlazorAppExcel.Share.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Atomic\" />
-  </ItemGroup>
 </Project>
