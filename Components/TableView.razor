@@ -48,14 +48,14 @@
 
             @foreach (var (row, index) in currentRow.Select((item, index) => (item, index)))
             {
-                IList<string> columns = Table.Columns.Select(_=>_.Text).ToList();
+                IList<Column> columns = Table.Columns;
 
                 <tr>
 
                     @if (AllowedEdit)
                     {
                         <td>
-                            <a @onclick:preventDefault="true" @onclick="@(e => OnEdit(row.getCellExcel(columns, Table.Types, index)))" href="#" class="text-decoration-none">
+                            <a @onclick:preventDefault="true" @onclick="@(e => OnEdit(row.getCellExcel(columns, index)))" href="#" class="text-decoration-none">
                                 <Icon Name="IconName.Pencil"></Icon>
                             </a>
                         </td>
@@ -76,7 +76,7 @@
                     {
                         var cell = row.Values[indexRow];
           
-                        var typeCell = Table.Types[indexRow];
+                        var typeCell = Table.Columns[indexRow].IdType;
                         var indexColumn = indexRow;
                         var nameColumn = this.Table.Columns[indexColumn].Key;
                         var list = this.Table.getUniqueValues(nameColumn);

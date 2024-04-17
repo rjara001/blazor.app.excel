@@ -192,7 +192,7 @@
 
     private async void DeleteColumn(Column item, int index)
     {
-        TableSelected.Types.RemoveAt(index);
+        // TableSelected.Types.RemoveAt(index);
         TableSelected.Columns.Remove(item);
 
         foreach (RowExcel row in TableSelected.Rows)
@@ -209,7 +209,7 @@
     private async void OnSaveTypeChanges(ExcelCellType type, int index)
     {
 
-        TableSelected.Types[index] = (int)type;
+        // TableSelected.Types[index] = (int)type;
 
         await excel.SetUser(session.User, TableSelected);
     }
@@ -219,7 +219,7 @@
 
         TableSelected.Columns[index].Text = value;
 
-        TableSelected.Types[index] = item.IdType;
+        // TableSelected.Types[index] = item.IdType;
 
         await excel.SetUser(session.User, TableSelected);
     }
@@ -259,7 +259,7 @@
     {
 
         this.TableSelected.Columns.Add(new Column("new column"));
-        this.TableSelected.Types.Add((int)Share.Enums.ExcelCellType.String);
+        // this.TableSelected.Types.Add((int)Share.Enums.ExcelCellType.String);
 
         foreach (RowExcel row in TableSelected.Rows)
         {
@@ -274,13 +274,13 @@
         base.OnInitialized();
         this._tables = this.session.User.TablesToList();
 
-        Task.Run(() =>
-        {
-            foreach (var item in this._tables)
-            {
-                item.EnsureListsBalanced();
-            }
-        });
+        // Task.Run(() =>
+        // {
+        //     foreach (var item in this._tables)
+        //     {
+        //         item.EnsureListsBalanced();
+        //     }
+        // });
 
        
 

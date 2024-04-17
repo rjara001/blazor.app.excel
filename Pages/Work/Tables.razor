@@ -117,9 +117,8 @@
 
     private async void AddNew()
     {
-        IList<string> columns = table.Columns.Select(_=>_.Text).ToList();
-
-        RowCellExcel _newRow = RowCellExcel.AddRow(columns, table.Types, table.Rows.Count()+1);
+     
+        RowCellExcel _newRow = RowCellExcel.AddRow(table.Columns, table.Rows.Count() + 1);
 
         var parameters = new Dictionary<string, object>();
         parameters.Add("RowExcel", _newRow);
@@ -135,8 +134,8 @@
     {
         var parameters = new Dictionary<string, object>();
         parameters.Add("Columns", this.table.Columns);
-        parameters.Add("Types", this.table.Types.Select(_ => Convert.ToString(_)).ToList());
-        parameters.Add("Save", (Action<IList<string>>)((row) => this.OnSaveType(row)));
+        // parameters.Add("Types", this.table.Types.Select(_ => Convert.ToString(_)).ToList());
+        parameters.Add("Save", (Action<IList<Column>>)((row) => this.OnSaveType(row)));
         parameters.Add("Cancel", (Action)(async () => await _dialogSettings.HideAsync()));
 
         await _dialogSettings.ShowAsync<SettingsDialog>(title: "Setting Types", parameters: parameters);
@@ -184,9 +183,9 @@
         table = session.User.TableActive;
     }
 
-    public async void OnSaveType(IList<string> types)
+    public async void OnSaveType(IList<Column> columns)
     {
-        this.table.Types = types.Select(_=>Convert.ToInt32(_)).ToList();
+        this.table.Columns = columns;
 
         await this.excelService.SetUser(session.User, table);
 
