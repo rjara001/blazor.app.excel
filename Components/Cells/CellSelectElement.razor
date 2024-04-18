@@ -1,17 +1,14 @@
 ﻿
 <label for="select1" class="col-4 col-form-label">@Name</label>
 <select class="form-select" aria-label="Default select example" @bind="Value" @onblur="OnValueChanged">
-    @* @onblur="@(()=>OnBlur.InvokeAsync())"> *@
     @foreach (var item in Values)
     {
         <option value="@item.Key">@item.Value</option>
     }
 </select>
 
-
 @code {
     [Parameter] public IDictionary<string,string> Values { get; set; }
-    [Parameter] public int Index { get; set; }
 
     private string _value;
 

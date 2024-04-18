@@ -2,16 +2,15 @@
 @using BlazorAppExcel.Models;
 @using BlazorAppExcel.Share.Enums
 @using BlazorAppExcel.Share.Models
-@* @inject ISnackbar Snackbar *@
 @using BlazorAppExcel.Components.Cells
 
 <div class="d-flex flex-column mb-3">
   
         @foreach (var item in Columns)
         {
-        var typeSelected = item.Type.ToString();
+            string typeSelected = item.IdType.ToString();
             <div class="p-2">
-            <CellSelectElement Name="@item.Name" Value="@typeSelected" Values="@Items" OnChildParameterChanged="@((string e)=>UpdateChildParameter(e, item))"></CellSelectElement>
+                <CellSelectElement Name="@item.Name" Value="@typeSelected" Values="@Items" OnChildParameterChanged="@((string e)=>UpdateChildParameter(e, item))"></CellSelectElement>
             </div>
 
         }
@@ -22,9 +21,6 @@
         <Button Color="ButtonColor.Secondary" @onclick="Cancel">Close</Button>
         <Button Color="ButtonColor.Primary" @onclick="SaveItem">Save changes</Button>
    </div>
-
-
-
 
 @code {
 
@@ -52,7 +48,6 @@
         base.OnParametersSet();
         // this.StateHasChanged();
     }
-
 
     private void SaveItem()
     {
